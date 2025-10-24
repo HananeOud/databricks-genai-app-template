@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { getEndpoints, type Endpoint } from "@/endpoints";
 import { loadConfig } from "@/config";
+import { OpenAPI } from "@/fastapi_client";
 import { useQueryExperiment } from "@/queries/useQueryTracing";
 import { Spinner } from "@/components/Spinner";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -59,7 +60,12 @@ export function Chat() {
 
   // Load configuration on component mount
   useEffect(() => {
-    loadConfig().then(() => {
+    loadConfig().then((config) => {
+      // Set OpenAPI base URL from config
+      if (config.apiBaseUrl) {
+        OpenAPI.BASE = config.apiBaseUrl;
+        console.log("✅ Set API base URL to:", config.apiBaseUrl);
+      }
       setEndpoints(getEndpoints());
       setConfigLoaded(true);
     });
