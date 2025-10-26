@@ -170,7 +170,7 @@ The app can be integrated into other React applications (e.g., `dbdemos-genai`) 
 
 ```bash
 # Build for host integration
-./scripts/prepare_for_host.sh /path/to/host-app/public/agent-monitoring
+./scripts/prepare_for_host.sh /path/to/host-app/public/assistant-app
 
 # Creates:
 # - Compiled app in specified directory

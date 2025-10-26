@@ -17,7 +17,7 @@ export interface AppConfig {
   apiBaseUrl?: string;
 }
 
-// Default configuration for local development
+// Default configuration (fallback if app_config.json not found)
 const DEFAULT_CONFIG: AppConfig = {
   endpoints: [
     {
@@ -26,17 +26,12 @@ const DEFAULT_CONFIG: AppConfig = {
       type: "openai-chat",
     },
     {
-      displayName: "Llama 4 Maverick",
-      endpointName: "databricks-llama-4-maverick",
-      type: "openai-chat",
-    },
-    {
       displayName: "mas_mehdi_genai_demo",
-      endpointName: "ka-6a76cd22-endpoint",
+      endpointName: "mas-367ff95f-endpoint",
       type: "databricks-agent",
     },
   ],
-  apiBaseUrl: "/api/agent-app", // Base URL for API calls when deployed in host app
+  apiBaseUrl: "http://localhost:8001/api", // Points to agent backend with table parsing
 };
 
 let cachedConfig: AppConfig | null = null;

@@ -49,7 +49,6 @@ export function NavDocuments({
               <SelectValue placeholder="Choose an agent" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="default">Databricks Agent</SelectItem>
               {endpoints.map((endpoint) => (
                 <SelectItem
                   key={endpoint.endpointName}

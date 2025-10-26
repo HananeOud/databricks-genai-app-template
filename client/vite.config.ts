@@ -35,6 +35,6 @@ export default defineConfig({
     },
   },
   // Base path can be configured for deployment
-  // The host app should set this if needed (e.g., '/agent-monitoring/')
+  // The host app should set this if needed (e.g., '/assistant-app/')
   base: "./",
 });

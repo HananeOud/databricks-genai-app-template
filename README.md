@@ -77,7 +77,7 @@ See [`env.template`](env.template) for all options.
 **Integrate into another React app:**
 
 ```bash
-./scripts/prepare_for_host.sh /path/to/host-app/public/agent-monitoring
+./scripts/prepare_for_host.sh /path/to/host-app/public/assistant-app
 ```
 
 This creates a self-contained build with runtime configuration. See [`DEPLOYMENT.md`](DEPLOYMENT.md) for details.

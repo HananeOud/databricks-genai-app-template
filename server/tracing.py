@@ -33,7 +33,7 @@ if MLFLOW_EXPERIMENT_ID:
     print(f'⚠️  MLflow experiment {MLFLOW_EXPERIMENT_ID} not found: {e}')
     print('⚠️  Creating a new experiment for tracing...')
     try:
-      experiment_name = f'/agent-monitoring-demo-{os.getpid()}'
+      experiment_name = f'/assistant-app-demo-{os.getpid()}'
       experiment = mlflow.set_experiment(experiment_name=experiment_name)
       MLFLOW_EXPERIMENT_ID = experiment.experiment_id
       tracing.set_destination(tracing.destination.Databricks(experiment_id=MLFLOW_EXPERIMENT_ID))

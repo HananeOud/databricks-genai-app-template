@@ -167,7 +167,7 @@ export function Chat() {
   const isLoading = isCustomLoading || isModelServingLoading;
   const isError = isCustomError || isModelServingError;
 
-  const [selectedAgent, setSelectedAgent] = useState("default");
+  const [selectedAgent, setSelectedAgent] = useState("mas-367ff95f-endpoint");
 
   return (
     <TooltipProvider>

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ============================================================================
-# Prepare Agent Monitoring App for Host Integration
+# Prepare Assistant Template App for Host Integration
 # ============================================================================
 #
 # This script builds the agent monitoring app and prepares it for integration
@@ -12,7 +12,7 @@
 #
 # Arguments:
 #   output_directory - Optional. Where to place the built app.
-#                      Defaults to ./dist/agent-monitoring-app
+#                      Defaults to ./dist/assistant-app-app
 #
 # The script will:
 #   1. Build the React frontend
@@ -54,7 +54,7 @@ error() {
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 CLIENT_DIR="$PROJECT_ROOT/client"
-OUTPUT_DIR="${1:-$PROJECT_ROOT/dist/agent-monitoring-app}"
+OUTPUT_DIR="${1:-$PROJECT_ROOT/dist/assistant-app-app}"
 
 info "Starting build process..."
 info "Project root: $PROJECT_ROOT"
@@ -129,9 +129,9 @@ success "Created app_config.json.template"
 info "Generating integration instructions..."
 
 cat > "$OUTPUT_DIR/INTEGRATION_GUIDE.md" << 'EOF'
-# Agent Monitoring App - Integration Guide
+# Assistant Template App - Integration Guide
 
-This directory contains the built Agent Monitoring App, ready for integration into a host React application.
+This directory contains the built Assistant Template App, ready for integration into a host React application.
 
 ## Contents
 
@@ -147,7 +147,7 @@ Copy the contents of this directory to your host app's public directory or appro
 
 For example, if integrating into `dbdemos-genai`:
 ```bash
-cp -r ./* /path/to/dbdemos-genai/public/agent-monitoring/
+cp -r ./* /path/to/dbdemos-genai/public/assistant-app/
 ```
 
 ### 2. Configure Endpoints
@@ -196,8 +196,8 @@ If you're serving the app as a static route in your host app:
 
 ```javascript
 // In your host app's router
-app.get('/agent-monitoring/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/agent-monitoring/index.html'));
+app.get('/assistant-app/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/assistant-app/index.html'));
 });
 ```
 
@@ -211,7 +211,7 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
-@app.get("/agent-monitoring/app_config.json")
+@app.get("/assistant-app/app_config.json")
 async def get_app_config():
     # Generate config based on user's available endpoints
     endpoints = get_user_endpoints()  # Your logic here
