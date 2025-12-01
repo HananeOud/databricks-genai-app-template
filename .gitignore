@@ -16,3 +16,6 @@ __pycache__
 .coverage.*.*.*.*.*
 
 .helper_files/
+
+# Analysis and summary files
+summary.md
