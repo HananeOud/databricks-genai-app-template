@@ -253,9 +253,26 @@ export function ChatView({ chatId, onChatIdChange, selectedAgentId, onAgentChang
 
       setMessages(prev => [...prev, assistantMessage])
       assistantMessageCreated = true
-      setIsLoading(false)
       devLog('✅ Assistant message added to UI')
 
+      // Save messages to backend storage
+      try {
+        await fetch(`/api/chats/${activeChatId}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [
+              { role: 'user', content },
+              { role: 'assistant', content: assistantContent }
+            ]
+          })
+        })
+        devLog('💾 Messages saved to backend')
+      } catch (saveError) {
+        console.error('Failed to save messages:', saveError)
+      }
+
+      setIsLoading(false)
       return
 
       // Old streaming code (disabled for now)

@@ -1,3 +1,0 @@
-# This file ensures the chat-history directory is tracked by git
-# The actual chat history data (index.json) is ignored
-

@@ -3,6 +3,8 @@
 import argparse
 import logging
 import os
+import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional, Union
 
@@ -452,6 +454,39 @@ async def get_chat_by_id(chat_id: str):
 
   logger.info(f'Retrieved chat {chat_id} with {len(chat.messages)} messages')
   return chat.dict()
+
+
+class AddMessageRequest(BaseModel):
+  """Request to add messages to a chat."""
+
+  messages: list[dict]  # List of {role, content}
+
+
+@app.post(API_PREFIX + '/chats/{chat_id}/messages')
+async def add_messages_to_chat(chat_id: str, request: AddMessageRequest):
+  """Add messages to an existing chat."""
+  logger.info(f'Adding {len(request.messages)} messages to chat: {chat_id}')
+
+  chat = storage.get(chat_id)
+  if not chat:
+    logger.warning(f'Chat not found: {chat_id}')
+    return Response(
+      content=f'Chat {chat_id} not found',
+      status_code=404
+    )
+
+  # Add each message
+  for msg_data in request.messages:
+    message = Message(
+      id=f"msg_{uuid.uuid4().hex[:12]}",
+      role=msg_data['role'],
+      content=msg_data['content'],
+      timestamp=datetime.now()
+    )
+    storage.add_message(chat_id, message)
+
+  logger.info(f'Added messages to chat {chat_id}, now has {len(chat.messages)} total messages')
+  return {'success': True, 'message_count': len(chat.messages)}
 
 
 @app.delete(API_PREFIX + '/chats/{chat_id}')
