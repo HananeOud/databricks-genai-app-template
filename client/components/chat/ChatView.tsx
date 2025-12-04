@@ -732,7 +732,7 @@ export function ChatView({ chatId, onChatIdChange, selectedAgentId, onAgentChang
       })
       // Show success notification in production
     } catch (error) {
-      console.error('Failed to submit feedback:', error)
+      console.warn('⚠️ Feedback feature - Work In Progress. Python backend endpoint needed:', error)
     }
     setFeedbackModal({ isOpen: false, messageId: '', feedbackType: 'positive' })
   }

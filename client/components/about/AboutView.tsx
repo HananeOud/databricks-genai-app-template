@@ -33,9 +33,9 @@ export function AboutView() {
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set())
   const [scrollY, setScrollY] = useState(0)
 
-  // Load content from JSON
+  // Load content from backend API
   useEffect(() => {
-    fetch('/content/about.json')
+    fetch('/api/config/about')
       .then(res => res.json())
       .then(data => setContent(data))
       .catch(err => console.error('Failed to load about content:', err))
@@ -125,7 +125,7 @@ export function AboutView() {
             muted
             playsInline
           >
-            <source src="/videos/placeholder.mp4" type="video/mp4" />
+            <source src="/videos/about_video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 

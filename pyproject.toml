@@ -8,11 +8,11 @@ include = ["server*"]
 exclude = ["client*", "tests*", "scripts*", "docs*"]
 
 [project]
-name = "nikhil-chatbot-fastapi-lha"
+name = "databricks-phoenix-app-template"
 version = "0.1.0"
-description = "Add your description here"
+description = "Databricks GenAI App Template (Phoenix)"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
   "fastapi[standard]>=0.115.8",
   "mlflow[databricks]>=3.1",

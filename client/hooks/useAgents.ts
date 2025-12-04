@@ -18,7 +18,7 @@ export function useAgents(): UseAgentsResult {
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    // Fetch from Python backend API (not from local file)
+    // Fetch from Next.js API proxy (proxies to Python backend)
     fetch('/api/agents')
       .then(res => {
         if (!res.ok) {

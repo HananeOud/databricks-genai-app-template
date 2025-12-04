@@ -45,7 +45,7 @@ export async function getAppConfig(): Promise<AppConfig> {
     return configLoadingPromise
   }
 
-  // Start loading config
+  // Start loading config from backend API (via Next.js proxy)
   configLoadingPromise = (async () => {
     try {
       const response = await fetch('/api/config/app')

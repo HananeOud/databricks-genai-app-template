@@ -1,4 +1,4 @@
-# Unnecessart configs
+# Unnecessary configs
 *conf*.json
 .DS_Store
 __pycache__
@@ -22,7 +22,6 @@ venv/
 
 # Analysis and summary files
 summary.md
-docs/
 
 # Build output
 dist/
@@ -34,3 +33,7 @@ client_old_backup/
 client/.next/
 client/out/
 client/node_modules/
+
+# Egg files
+*.egg-info
+*.egg-info/
