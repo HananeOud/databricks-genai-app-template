@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend-url";
 
 export async function GET(request: NextRequest) {
   try {
     // Proxy to Python backend
-    const response = await fetch("http://localhost:8000/api/chats");
+    const response = await fetch(`${BACKEND_URL}/api/chats`);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Proxy to Python backend
-    const response = await fetch("http://localhost:8000/api/chats", {
+    const response = await fetch(`${BACKEND_URL}/api/chats`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

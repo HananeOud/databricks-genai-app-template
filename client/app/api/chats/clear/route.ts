@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend-url";
 
 export async function POST() {
   try {
     // Proxy to Python backend (DELETE /api/chats clears all)
-    const response = await fetch("http://localhost:8000/api/chats", {
+    const response = await fetch(`${BACKEND_URL}/api/chats`, {
       method: "DELETE",
     });
 

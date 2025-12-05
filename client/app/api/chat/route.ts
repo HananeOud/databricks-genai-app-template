@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend-url";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     // Call Python backend
     const backendResponse = await fetch(
-      "http://localhost:8000/api/invoke_endpoint",
+      `${BACKEND_URL}/api/invoke_endpoint`,
       {
         method: "POST",
         headers: {

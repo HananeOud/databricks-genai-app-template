@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend-url";
 
 export async function GET() {
   try {
     // Proxy to Python backend
-    const response = await fetch("http://localhost:8000/api/config/app");
+    const response = await fetch(`${BACKEND_URL}/api/config/app`);
 
     if (!response.ok) {
       return NextResponse.json(

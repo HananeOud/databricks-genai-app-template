@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend-url";
 
 export async function GET(
   request: NextRequest,
@@ -8,7 +9,7 @@ export async function GET(
     const { id } = await params;
 
     // Proxy to Python backend
-    const response = await fetch(`http://localhost:8000/api/chats/${id}`);
+    const response = await fetch(`${BACKEND_URL}/api/chats/${id}`);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -36,7 +37,7 @@ export async function DELETE(
     const { id } = await params;
 
     // Proxy to Python backend
-    const response = await fetch(`http://localhost:8000/api/chats/${id}`, {
+    const response = await fetch(`${BACKEND_URL}/api/chats/${id}`, {
       method: "DELETE",
     });
 

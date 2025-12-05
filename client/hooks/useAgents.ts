@@ -19,7 +19,7 @@ export function useAgents(): UseAgentsResult {
 
   useEffect(() => {
     // Fetch from Next.js API proxy (proxies to Python backend)
-    fetch('/api/agents')
+    fetch('/api/config/agents')
       .then(res => {
         if (!res.ok) {
           throw new Error(`Failed to load agents: ${res.status}`)

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BACKEND_URL } from "@/lib/backend-url";
 
 export async function POST(
   request: NextRequest,
@@ -10,7 +11,7 @@ export async function POST(
 
     // Proxy to Python backend
     const response = await fetch(
-      `http://localhost:8000/api/chats/${id}/messages`,
+      `${BACKEND_URL}/api/chats/${id}/messages`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
