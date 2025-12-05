@@ -74,13 +74,17 @@ export function ChatView({
     const isDifferentChat = chatId !== currentSessionId;
 
     if (isDifferentChat) {
-      // Abort any active stream from the previous chat
-      if (abortControllerRef.current) {
-        devLog("🛑 Aborting stream for previous chat:", currentSessionId);
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
+      // Only abort if we're LEAVING a chat (not creating a new one)
+      // If currentSessionId is set, we're switching away from it
+      if (currentSessionId) {
+        // Abort any active stream from the previous chat
+        if (abortControllerRef.current) {
+          devLog("🛑 Aborting stream for previous chat:", currentSessionId);
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+        }
+        activeStreamChatIdRef.current = undefined;
       }
-      activeStreamChatIdRef.current = undefined;
 
       devLog("🔄 Chat session changed:", {
         from: currentSessionId,
@@ -262,6 +266,7 @@ export function ChatView({
             role: m.role,
             content: m.content,
           })),
+          stream: true, // Enable streaming
         }),
         signal: abortController.signal,
       });
@@ -279,54 +284,20 @@ export function ChatView({
         throw new Error(`API returned ${response.status}: ${errorText}`);
       }
 
-      // Handle OpenAI-like response format
-      const data = await response.json();
-      devLog("📦 Got response data:", data);
+      // Streaming response handling
+      console.log("🌊 STREAMING: About to start reading stream");
+      console.log("🌊 STREAMING: response.body exists?", !!response.body);
 
-      const assistantContent =
-        data.choices?.[0]?.message?.content || "No response";
-
-      const assistantMessage: Message = {
-        id: assistantMessageId,
-        role: "assistant",
-        content: assistantContent,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-      assistantMessageCreated = true;
-      devLog("✅ Assistant message added to UI");
-
-      // Save messages to backend storage
-      try {
-        await fetch(`/api/chats/${activeChatId}/messages`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: [
-              { role: "user", content },
-              { role: "assistant", content: assistantContent },
-            ],
-          }),
-        });
-        devLog("💾 Messages saved to backend");
-      } catch (saveError) {
-        console.error("Failed to save messages:", saveError);
-      }
-
-      setIsLoading(false);
-      return;
-
-      // Old streaming code (disabled for now)
-      /*
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
 
       if (!reader) {
-        throw new Error('No response body')
+        console.error("❌ STREAMING: No reader from response body!");
+        throw new Error("No response body");
       }
 
-      devLog('📖 Starting to read stream...')
+      console.log("🌊 STREAMING: Reader created successfully");
+      devLog("📖 Starting to read stream...");
 
       let buffer = ''
       let streamedContent = ''
@@ -334,12 +305,21 @@ export function ChatView({
       let traceSummary: TraceSummary | null = null
 
       try {
+        console.log("🌊 STREAMING: Entering read loop");
+        let chunkCount = 0;
         while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("🌊 STREAMING: Stream done");
+            break;
+          }
 
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
+          chunkCount++;
+          console.log(`🌊 STREAMING: Chunk ${chunkCount}, bytes:`, value?.length);
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          console.log(`🌊 STREAMING: Split into ${lines.length} lines`);
           
           // Keep the last incomplete line in the buffer
           buffer = lines.pop() || ''
@@ -617,9 +597,8 @@ export function ChatView({
         }
 
       } finally {
-        reader.releaseLock()
+        reader.releaseLock();
       }
-      */
     } catch (error) {
       // Handle AbortError gracefully (user switched chats)
       if (error instanceof Error && error.name === "AbortError") {

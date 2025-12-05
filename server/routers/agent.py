@@ -1,13 +1,15 @@
 """Agent invocation and feedback endpoints."""
 
+import json
 import logging
 from typing import Union
 
 import mlflow
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from ..agents.model_serving import model_serving_endpoint
+from ..agents.model_serving import model_serving_endpoint, model_serving_endpoint_stream
 from ..config_loader import config_loader
 
 logger = logging.getLogger(__name__)
@@ -27,6 +29,7 @@ class InvokeEndpointRequest(BaseModel):
 
   agent_id: str
   messages: list[dict[str, str]]
+  stream: bool = True  # Default to streaming
 
 
 @router.post('/log_assessment')
@@ -64,8 +67,9 @@ async def invoke_endpoint(options: InvokeEndpointRequest):
 
   Currently only supports 'databricks-endpoint' deployment type.
   Calls external Databricks model serving endpoints.
+  Supports both streaming and non-streaming modes.
   """
-  logger.info(f'Invoking agent: {options.agent_id}')
+  logger.info(f'Invoking agent: {options.agent_id} (stream={options.stream})')
 
   # Look up agent configuration
   agent = config_loader.get_agent_by_id(options.agent_id)
@@ -93,9 +97,26 @@ async def invoke_endpoint(options: InvokeEndpointRequest):
         }
 
       logger.info(f'Calling Databricks endpoint: {endpoint_name}')
-      return model_serving_endpoint(
-        endpoint_name=endpoint_name, messages=options.messages, endpoint_type='databricks-agent'
-      )
+
+      # Use streaming or non-streaming based on request
+      if options.stream:
+        return StreamingResponse(
+          model_serving_endpoint_stream(
+            endpoint_name=endpoint_name,
+            messages=options.messages,
+            endpoint_type='databricks-agent'
+          ),
+          media_type='text/event-stream',
+          headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no'  # Disable nginx buffering
+          }
+        )
+      else:
+        return model_serving_endpoint(
+          endpoint_name=endpoint_name, messages=options.messages, endpoint_type='databricks-agent'
+        )
 
     else:
       # Only databricks-endpoint deployment type is supported for now
