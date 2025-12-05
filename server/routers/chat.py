@@ -87,6 +87,8 @@ async def add_messages_to_chat(chat_id: str, request: AddMessageRequest):
       role=msg_data['role'],
       content=msg_data['content'],
       timestamp=datetime.now(),
+      trace_id=msg_data.get('trace_id'),  # Optional trace ID from MLflow
+      trace_summary=msg_data.get('trace_summary'),  # Optional trace summary data
     )
     storage.add_message(chat_id, message)
 

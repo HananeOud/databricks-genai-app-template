@@ -21,6 +21,7 @@ interface ChatViewProps {
   selectedAgentId?: string;
   onAgentChange?: (agentId: string) => void;
   initialMessage?: string;
+  onStreamingChange?: (isStreaming: boolean) => void;
 }
 
 export function ChatView({
@@ -29,6 +30,7 @@ export function ChatView({
   selectedAgentId,
   onAgentChange,
   initialMessage,
+  onStreamingChange,
 }: ChatViewProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,6 +125,13 @@ export function ChatView({
     }
   }, [initialMessage, chatId, messages.length, isLoading]);
 
+  // Notify parent when streaming state changes
+  useEffect(() => {
+    if (onStreamingChange) {
+      onStreamingChange(isLoading);
+    }
+  }, [isLoading, onStreamingChange]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -159,9 +168,11 @@ export function ChatView({
       const loadedMessages = chat.messages.map((msg: any) => ({
         ...msg,
         timestamp: new Date(msg.timestamp),
+        // Map backend snake_case to frontend camelCase
+        traceId: msg.trace_id,
         // Deep clone traceSummary to ensure no reference sharing
-        traceSummary: msg.traceSummary
-          ? JSON.parse(JSON.stringify(msg.traceSummary))
+        traceSummary: msg.trace_summary
+          ? JSON.parse(JSON.stringify(msg.trace_summary))
           : undefined,
       }));
 
@@ -202,9 +213,14 @@ export function ChatView({
     let assistantMessageCreated = false;
     devLog("💬 Prepared message ID:", assistantMessageId);
 
+    // Declare variables outside try block so they're accessible in finally
+    let activeChatId: string | undefined = chatId;
+    let streamedContent = '';
+    let traceId = '';
+    let traceSummary: TraceSummary | null = null;
+
     try {
       // If no chatId, we need to create a new chat first
-      let activeChatId = chatId;
       if (!activeChatId) {
         devLog("📝 Creating new chat with agent:", selectedAgentId);
         const createResponse = await fetch("/api/chats", {
@@ -303,9 +319,7 @@ export function ChatView({
       devLog("📖 Starting to read stream...");
 
       let buffer = ''
-      let streamedContent = ''
-      let traceId = ''
-      let traceSummary: TraceSummary | null = null
+      // streamedContent, traceId, traceSummary now declared outside try block
       let lastUpdateTime = 0
       const UPDATE_INTERVAL = 50 // Update UI every 50ms for smooth streaming
 
@@ -648,6 +662,36 @@ export function ChatView({
       setIsLoading(false);
       // Clear abort controller ref
       abortControllerRef.current = null;
+
+      // Save messages to backend after streaming completes
+      // This ensures chat history persists when switching between conversations
+      if (activeChatId && assistantMessageCreated && streamedContent) {
+        try {
+          devLog("💾 Saving messages to backend for chat:", activeChatId);
+          await fetch(`/api/chats/${activeChatId}/messages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: [
+                {
+                  role: "user",
+                  content: userMessage.content,
+                },
+                {
+                  role: "assistant",
+                  content: streamedContent,
+                  trace_id: traceId,
+                  trace_summary: traceSummary,
+                },
+              ],
+            }),
+          });
+          devLog("✅ Messages saved to backend");
+        } catch (saveError) {
+          console.error("Failed to save messages to backend:", saveError);
+          // Don't throw - this is a background save operation
+        }
+      }
     }
   };
 

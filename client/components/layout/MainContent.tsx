@@ -15,9 +15,10 @@ interface MainContentProps {
   selectedAgentId?: string
   onAgentChange?: (agentId: string) => void
   initialChatMessage?: string
+  onStreamingChange?: (isStreaming: boolean) => void
 }
 
-export function MainContent({ activeTab, currentChatId, onChatIdChange, selectedAgentId, onAgentChange, initialChatMessage }: MainContentProps) {
+export function MainContent({ activeTab, currentChatId, onChatIdChange, selectedAgentId, onAgentChange, initialChatMessage, onStreamingChange }: MainContentProps) {
   const { colors, animatedBackground } = useThemeContext()
 
   return (
@@ -47,6 +48,7 @@ export function MainContent({ activeTab, currentChatId, onChatIdChange, selected
             selectedAgentId={selectedAgentId}
             onAgentChange={onAgentChange}
             initialMessage={initialChatMessage}
+            onStreamingChange={onStreamingChange}
           />
         </div>
         {activeTab === 'dashboard' && <DashboardView />}

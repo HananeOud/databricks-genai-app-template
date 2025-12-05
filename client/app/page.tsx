@@ -50,6 +50,7 @@ function HomeContent() {
   const [initialChatMessage, setInitialChatMessage] = useState<
     string | undefined
   >(undefined);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -67,6 +68,12 @@ function HomeContent() {
   };
 
   const handleNewChat = () => {
+    // Prevent creating new chat while streaming a response
+    if (isStreaming) {
+      alert("⏳ Please wait for the current response to complete before starting a new chat.");
+      return;
+    }
+
     // Clear the current chat ID to start fresh
     // The chat will be created automatically when the user sends their first message
     setCurrentChatId(undefined);
@@ -75,6 +82,12 @@ function HomeContent() {
   };
 
   const handleChatSelect = (chatId: string) => {
+    // Prevent switching chats while streaming a response
+    if (isStreaming) {
+      alert("⏳ Please wait for the current response to complete before switching chats.");
+      return;
+    }
+
     setCurrentChatId(chatId);
     handleTabChange("chat");
     // Close sidebar on mobile after selection
@@ -145,6 +158,7 @@ function HomeContent() {
           selectedAgentId={selectedAgentId}
           onAgentChange={setSelectedAgentId}
           initialChatMessage={initialChatMessage}
+          onStreamingChange={setIsStreaming}
         />
       </div>
 
