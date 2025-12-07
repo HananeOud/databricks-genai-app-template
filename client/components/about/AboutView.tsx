@@ -156,10 +156,9 @@ export function AboutView() {
               <h1 className="text-3xl md:text-5xl font-bold text-[var(--color-primary-navy)] mb-3 leading-tight">
                 {content.hero.title}
               </h1>
-              <p
-                className="text-base md:text-lg text-[var(--color-text-primary)] leading-relaxed whitespace-pre-line"
-                dangerouslySetInnerHTML={{ __html: content.hero.description }}
-              />
+              <p className="text-base md:text-lg text-[var(--color-text-primary)] leading-relaxed whitespace-pre-line">
+                {content.hero.description}
+              </p>
             </div>
           </div>
         </div>
