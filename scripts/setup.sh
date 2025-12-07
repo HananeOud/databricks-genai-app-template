@@ -36,7 +36,7 @@ if [ ! -f "$ENV_FILE" ]; then
     echo "📝 Optional Configuration (for deployment to Databricks Apps):"
     echo ""
     read -p "DATABRICKS_APP_NAME (press Enter to skip): " DATABRICKS_APP_NAME
-    read -p "LHA_SOURCE_CODE_PATH (e.g., /Workspace/Users/you@company.com/app-name, press Enter to skip): " LHA_SOURCE_CODE_PATH
+    read -p "WORKSPACE_SOURCE_PATH (e.g., /Workspace/Users/you@company.com/app-name, press Enter to skip): " WORKSPACE_SOURCE_PATH
 
     # Create .env.local
     cat > "$ENV_FILE" << EOF
@@ -53,8 +53,8 @@ EOF
 DATABRICKS_APP_NAME=$DATABRICKS_APP_NAME" >> "$ENV_FILE"
     fi
 
-    if [ ! -z "$LHA_SOURCE_CODE_PATH" ]; then
-        echo "LHA_SOURCE_CODE_PATH=$LHA_SOURCE_CODE_PATH" >> "$ENV_FILE"
+    if [ ! -z "$WORKSPACE_SOURCE_PATH" ]; then
+        echo "WORKSPACE_SOURCE_PATH=$WORKSPACE_SOURCE_PATH" >> "$ENV_FILE"
     fi
 
     echo ""

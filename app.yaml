@@ -2,3 +2,6 @@ command: [
   "uvicorn",
   "server.app:app"
 ]
+env:
+  - name: ENV
+    value: production

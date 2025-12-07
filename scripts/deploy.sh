@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Deploy to Databricks Apps
-# Requires DATABRICKS_APP_NAME and LHA_SOURCE_CODE_PATH in .env.local
+# Requires DATABRICKS_APP_NAME and WORKSPACE_SOURCE_PATH in .env.local
 
 set -e
 
@@ -13,10 +13,10 @@ then
   set +a
 fi
 
-# If LHA_SOURCE_CODE_PATH is not set throw an error.
-if [ -z "$LHA_SOURCE_CODE_PATH" ]
+# If WORKSPACE_SOURCE_PATH is not set throw an error.
+if [ -z "$WORKSPACE_SOURCE_PATH" ]
 then
-  echo "LHA_SOURCE_CODE_PATH is not set. Please set to the /Workspace/Users/{username}/{lha-name} in .env.local."
+  echo "WORKSPACE_SOURCE_PATH is not set. Please set to the /Workspace/Users/{username}/{app-name} in .env.local."
   exit 1
 fi
 
@@ -60,14 +60,14 @@ echo ""
 
 # Sync code to workspace
 echo "📤 Syncing code to workspace..."
-databricks sync . "$LHA_SOURCE_CODE_PATH" \
+databricks sync . "$WORKSPACE_SOURCE_PATH" \
   --profile "$DATABRICKS_CONFIG_PROFILE"
 
 # Deploy app
 echo ""
 echo "🎯 Deploying app: $DATABRICKS_APP_NAME..."
 databricks apps deploy $DATABRICKS_APP_NAME \
-  --source-code-path "$LHA_SOURCE_CODE_PATH" \
+  --source-code-path "$WORKSPACE_SOURCE_PATH" \
   --profile "$DATABRICKS_CONFIG_PROFILE"
 
 echo ""
