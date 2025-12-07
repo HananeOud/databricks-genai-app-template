@@ -37,3 +37,6 @@ client/node_modules/
 # Egg files
 *.egg-info
 *.egg-info/
+
+# databricks sync
+.databricks/
