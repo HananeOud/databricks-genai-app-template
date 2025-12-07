@@ -18,7 +18,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Feedback linking configuration
-TRACE_TIME_WINDOW_SECONDS = 2  # Time window for finding agent traces
+# NOTE: This is a workaround, not a final solution
+# We search FORWARD from router trace creation because agent traces are always
+# created AT or AFTER the router trace (never before)
+# See docs/features/feedback.md for limitations and future improvements
+TRACE_TIME_WINDOW_SECONDS = 3  # Time window for finding agent traces (forward-only)
 
 
 def find_trace_for_feedback(
@@ -86,10 +90,15 @@ def _find_databricks_agent_trace(
 ) -> str:
   """Find the Databricks agent's server-side trace using time proximity.
 
+  WORKAROUND: This is not a final solution - see docs/features/feedback.md
+
   The agent creates its own trace on Databricks servers. We find it by:
-  1. Searching for traces created within ±2 seconds of our router trace
+  1. Searching for traces created AFTER our router trace (forward-only search)
   2. Filtering out our router trace (has the client_request_id tag)
   3. Picking the closest trace by timestamp
+
+  Why forward-only: Agent traces are always created AT or AFTER the router trace.
+  Cold starts can delay agent trace creation by 30+ seconds.
 
   Args:
     router_trace_id: Our router trace ID (to exclude from search)
@@ -100,9 +109,9 @@ def _find_databricks_agent_trace(
   Returns:
     Agent trace ID, or router trace ID as fallback
   """
-  # Define time window
+  # Define time window (forward-only search)
   time_window_ms = TRACE_TIME_WINDOW_SECONDS * 1000
-  start_time = router_timestamp_ms - time_window_ms
+  start_time = router_timestamp_ms  # Start at router trace, not before
   end_time = router_timestamp_ms + time_window_ms
 
   logger.info(

@@ -39,7 +39,7 @@ Since we cannot merge the two traces, we use a **time-based linking strategy** t
    - Frontend sends feedback with the `client_request_id`
    - Backend finds the **router trace** by searching `tags.client_request_id`
    - Extracts the timestamp from the router trace
-   - Searches for the **agent trace** within ±2 seconds of that timestamp
+   - Searches for the **agent trace** within 3 seconds AFTER that timestamp (forward-only search)
    - Logs feedback to the **agent trace** (the one with conversation content)
 
 ## Implementation Details
@@ -89,9 +89,11 @@ def find_trace_for_feedback(client_request_id: str, agent_config: dict) -> str:
 
 ### Time Window Configuration
 
-- **Tolerance**: ±2 seconds from router trace timestamp
+- **Search window**: 3 seconds AFTER router trace timestamp (forward-only)
+- **Why forward-only**: Agent traces are always created AT or AFTER the router trace, never before
 - **Experiment scope**: Only searches within the agent's MLflow experiment
 - **Fallback**: If agent trace not found, logs feedback to router trace (ensures feedback is not lost)
+- **Limitation**: Cold starts (30+ seconds) exceed this window, causing first-request feedback to go to router trace
 
 ## Pros and Cons
 
@@ -106,9 +108,36 @@ def find_trace_for_feedback(client_request_id: str, agent_config: dict) -> str:
 ### ⚠️ Limitations
 
 1. **Two traces exist**: Router trace (empty) + Agent trace (with content) - slight storage overhead
-2. **Timing dependency**: Relies on traces being created close in time (~2 seconds)
+2. **Timing dependency**: Relies on traces being created close in time (~3 seconds)
 3. **Clock skew**: If Databricks server clock differs significantly from local clock, linking may fail
-4. **Multiple agents**: If multiple agent calls happen within 2 seconds, could match wrong trace (mitigated by experiment ID scoping)
+4. **Multiple agents**: If multiple agent calls happen within 3 seconds, could match wrong trace (mitigated by experiment ID scoping)
+5. **Cold start issue**: When endpoints scale from zero, agent trace creation can be delayed by 30+ seconds, exceeding our 3-second search window. This causes feedback to be logged to the router trace instead of the agent trace on first request after cold start. Subsequent requests (warm starts) work correctly.
+
+### Known Issues: Cold Start Delays
+
+**Current Workaround:** Forward-only time search (3 seconds)
+
+When a Databricks Model Serving endpoint scales from zero (cold start), there can be significant delays:
+
+```
+Timeline:
+t=0s:    Request sent, router trace created (timestamp: T0)
+t=0-30s: Endpoint scaling up, loading model
+t=30s:   Agent finally starts processing, creates trace (timestamp: T0 + 30s)
+         └─ Outside our 3-second search window!
+         └─ Feedback goes to router trace instead of agent trace
+```
+
+**Why we use 3 seconds (not 30+):**
+- Larger windows increase risk of matching wrong traces in concurrent scenarios
+- Trade-off between cold start handling and precision
+- Warm starts (subsequent requests) complete in <1 second and work correctly
+
+**Ideal Solution (future improvement):**
+- Capture the agent's MLflow trace ID from the response stream
+- Send it to frontend with the message
+- Use exact trace ID for feedback (no time-based guessing)
+- **Challenge:** Databricks agent stream doesn't currently include MLflow trace ID, only LangChain run IDs
 
 ## Future Extensibility
 
@@ -163,10 +192,10 @@ traces = client.search_traces(
 router_trace = traces[0]
 router_time = router_trace.info.timestamp_ms
 
-# Search within ±2 seconds
+# Search within 3 seconds AFTER router trace (forward-only)
 agent_traces = client.search_traces(
     experiment_ids=["your-experiment-id"],
-    filter_string=f"timestamp_ms >= {router_time - 2000} AND timestamp_ms <= {router_time + 2000}",
+    filter_string=f"timestamp_ms >= {router_time} AND timestamp_ms <= {router_time + 3000}",
     max_results=10
 )
 
