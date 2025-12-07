@@ -66,6 +66,12 @@ echo "🚀 Deploying to Databricks Apps"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+# Echo current working directory
+echo "Current Working Directory:"
+echo ""
+pwd
+echo ""
+
 # Sync code to workspace
 echo "📤 Syncing code to workspace..."
 databricks sync . "$WORKSPACE_SOURCE_PATH" \

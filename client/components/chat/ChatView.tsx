@@ -50,7 +50,7 @@ export function ChatView({
       call_id: string;
       name: string;
       arguments: any;
-      output: any;
+      output?: any;
     }>;
     userMessage?: string;
     assistantResponse?: string;
