@@ -5,6 +5,14 @@
 
 set -e
 
+# Ensure script is run from project root
+if [ ! -f "pyproject.toml" ] || [ ! -d "client" ]; then
+  echo "❌ Error: This script must be run from the project root directory"
+  echo "Current directory: $(pwd)"
+  echo "Run: cd /path/to/databricks-genai-app-template && ./scripts/deploy.sh"
+  exit 1
+fi
+
 # Load environment variables from .env.local if it exists.
 if [ -f .env.local ]
 then
@@ -61,6 +69,7 @@ echo ""
 # Sync code to workspace
 echo "📤 Syncing code to workspace..."
 databricks sync . "$WORKSPACE_SOURCE_PATH" \
+  --exclude-from .gitignore \
   --profile "$DATABRICKS_CONFIG_PROFILE"
 
 # Deploy app
