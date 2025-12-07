@@ -39,28 +39,6 @@
       "mlflow_experiment_id": "2640373444635244",
       "mlflow_experiment_url": "https://adb-984752964297111.11.azuredatabricks.net/ml/experiments/2640373444635244/traces?o=984752964297111",
       "mlflow_traces_url": "https://adb-984752964297111.11.azuredatabricks.net/ml/experiments/2640373444635244/traces?o=984752964297111"
-    },
-    {
-      "id": "databricks-agent-02",
-      "name": "databricks_general_agent",
-      "deployment_type": "databricks-endpoint",
-      "endpoint_name": "databricks-claude-sonnet-4-5",
-      "display_name": "General Assistant",
-      "display_description": "Versatile agent for everyday tasks and general queries related to AGS",
-      "chat_title": "General Assistant",
-      "chat_subtitle": "Ask me (almost) anything about your day-to-day work and general queries.",
-      "llm": "databricks-claude-sonnet-4-5/",
-      "tools": [
-        {
-          "display_name": "Company Knowledge Base",
-          "type": "Vector Search",
-          "display_description": "Company Intranet & onboarding documents to help answer your day-to-day questions.",
-          "url": "https://adb-984752964297111.11.azuredatabricks.net"
-        }
-      ],
-      "mlflow_experiment_id": "3516058919983324",
-      "mlflow_experiment_url": "https://adb-984752964297111.11.azuredatabricks.net",
-      "mlflow_traces_url": "https://adb-984752964297111.11.azuredatabricks.net"
     }
   ]
 }

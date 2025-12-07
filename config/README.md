@@ -32,9 +32,9 @@ Defines your AI agents and their endpoints.
 {
   "agents": [
     {
-      "id": "my-agent-01",                          // Unique ID
+      "id": "my-agent-01",                          // Unique ID. Mainly for logging purposes and other internal tasks.
       "name": "my-agent",                           // Internal name
-      "deployment_type": "databricks-endpoint",     // Type: "databricks-endpoint" or "langchain-agent"
+      "deployment_type": "databricks-endpoint",     // Type: "databricks-endpoint" or "agent-bricks-mas" or "langchain-agent"
       "endpoint_name": "my-endpoint-name",          // Databricks endpoint name (not full URL)
       "display_name": "My Agent",                   // Shown in UI
       "display_description": "Agent description",
@@ -59,6 +59,7 @@ Defines your AI agents and their endpoints.
 
 **Agent Deployment Types:**
 - `databricks-endpoint`: External Databricks serving endpoint (currently supported)
+- `agent-bricks-mas`: Databricks endpoint serving a Agent Bricks Multi Agent Supervisor (not yet implemented)
 - `langchain-agent`: Built-in LangChain agent (not yet implemented)
 
 ### `about.json` - About Page Content
