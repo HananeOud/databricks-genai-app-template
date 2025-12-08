@@ -8,7 +8,6 @@ Complete guide to setting up, configuring, and deploying the Databricks GenAI Ap
 - [Local Development Setup](#local-development-setup)
 - [Configuration](#configuration)
 - [Running Locally](#running-locally)
-- [Testing](#testing)
 - [Databricks Apps Deployment](#databricks-apps-deployment)
 - [Monitoring and Troubleshooting](#monitoring-and-troubleshooting)
 
@@ -16,28 +15,27 @@ Complete guide to setting up, configuring, and deploying the Databricks GenAI Ap
 
 ### Required Software
 
-- **Python 3.12+** with [uv](https://github.com/astral-sh/uv) package manager
-- **Bun** for frontend development (faster than npm/yarn)
+- **Python 3.11+** with [uv](https://github.com/astral-sh/uv) package manager
+- **Node.js 18+** with npm
 - **Git** for version control
 
 ### Databricks Requirements
 
 - Databricks workspace (AWS, Azure, or GCP)
 - Unity Catalog enabled
-- Model Serving endpoint (for agent deployment)
-- MLflow experiment (can be auto-created)
+- Model Serving endpoint deployed with your agent
+- Personal Access Token (PAT) for local development
 
 ### Access & Permissions
 
 **For local development:**
 - Personal Access Token (PAT) with workspace access
-- Permissions to access Unity Catalog
-- Permissions to read/write MLflow experiments
+- Permissions to call your Model Serving endpoint
 
 **For Databricks Apps deployment:**
 - Permission to create and manage Databricks Apps
-- Permission to read/write to workspace files
-- Model Serving endpoint access
+- Permission to sync files to workspace
+- Model Serving endpoint must be accessible from Databricks Apps
 
 ## Local Development Setup
 
@@ -48,8 +46,8 @@ Complete guide to setting up, configuring, and deploying the Databricks GenAI Ap
 # Install uv (Python package manager)
 brew install uv
 
-# Install bun (JavaScript runtime)
-brew install bun
+# Node.js and npm (if not already installed)
+brew install node
 ```
 
 **Linux:**
@@ -57,8 +55,9 @@ brew install bun
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install bun
-curl -fsSL https://bun.sh/install | bash
+# Install Node.js (Ubuntu/Debian)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
 
 **Windows:**
@@ -66,8 +65,7 @@ curl -fsSL https://bun.sh/install | bash
 # Install uv
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# Install bun
-powershell -c "irm bun.sh/install.ps1|iex"
+# Install Node.js from https://nodejs.org/
 ```
 
 ### 2. Clone Repository
@@ -77,247 +75,193 @@ git clone https://github.com/databricks-solutions/databricks-genai-app-template.
 cd databricks-genai-app-template
 ```
 
-### 3. Install Project Dependencies
+### 3. Run Setup Script
 
 ```bash
-# Python dependencies (backend)
-uv sync
-
-# JavaScript dependencies (frontend)
-cd client
-bun install
-cd ..
+./scripts/setup.sh
 ```
 
-### 4. Configure Environment
+**What this script does:**
 
-**Option A: Interactive Setup (Recommended)**
+1. **Creates `.env.local`** with prompts for:
+   - `DATABRICKS_HOST` - Your Databricks workspace URL (e.g., https://adb-123456789.azuredatabricks.net)
+   - `DATABRICKS_TOKEN` - Your Personal Access Token
+   - `DATABRICKS_APP_NAME` - (Optional) For deployment
+   - `WORKSPACE_SOURCE_PATH` - (Optional) For deployment
 
-```bash
-./setup.sh
+2. **Installs Python dependencies:**
+   - Runs `uv sync` to create `.venv/` and install backend dependencies
+
+3. **Installs frontend dependencies:**
+   - Runs `npm install` in the `client/` directory
+
+**Output:**
 ```
+✅ .env.local created
+✅ Python dependencies installed (.venv/ created)
+✅ Frontend dependencies installed
 
-This script will:
-- Check for existing `.env.local` file
-- Prompt for required configuration values
-- Validate Databricks connectivity
-- Create or update `.env.local`
-
-**Option B: Manual Setup**
-
-Copy the template and edit manually:
-
-```bash
-cp env.template .env.local
+Next steps:
+  1. Run: ./scripts/start_dev.sh
+  2. Open: http://localhost:3000
 ```
-
-Edit `.env.local` with your values (see [Configuration](#configuration) section below).
-
-**Option C: Use System Environment Variables**
-
-The app will automatically fall back to system environment variables if `.env.local` doesn't exist.
 
 ## Configuration
 
-### Required Environment Variables
+### Environment Variables (.env.local)
 
-Create `.env.local` in the project root with these variables:
-
-```bash
-# Databricks Configuration
-DATABRICKS_HOST=https://your-workspace.cloud.databricks.com
-DATABRICKS_TOKEN=dapi...  # Personal Access Token
-
-# MLflow Configuration
-MLFLOW_EXPERIMENT_ID=1234567890  # MLflow experiment for tracing
-```
-
-### Optional Environment Variables
+The `.env.local` file contains your local development configuration:
 
 ```bash
-# Environment Mode
-ENV=development  # "development" or "production"
+# Required for local development
+DATABRICKS_HOST=https://adb-123456789.azuredatabricks.net
+DATABRICKS_TOKEN=dapi...
 
-# Databricks Profile (optional for local dev)
-DATABRICKS_CONFIG_PROFILE=DEFAULT  # Profile from ~/.databrickscfg
+# Optional - for deployment
+DATABRICKS_APP_NAME=my-genai-app
+WORKSPACE_SOURCE_PATH=/Workspace/Users/your.email@company.com/app-template
 ```
 
-### Configuration Files
+**Important:**
+- `.env.local` is in `.gitignore` - DO NOT commit this file
+- Contains sensitive credentials (PAT token)
+- Only used for local development
+- Production uses OAuth (no token needed)
 
-#### `config/agents.json`
+See `env.template` for complete reference.
 
-Define available agents and their endpoints:
+### Agent Configuration (config/agents.json)
+
+Define your agents and their endpoints:
 
 ```json
 {
   "agents": [
     {
       "id": "databricks-agent-01",
-      "displayName": "Databricks Assistant",
-      "description": "Explore Unity Catalog and answer questions",
+      "name": "my-agent",
       "deployment_type": "databricks-endpoint",
-      "endpoint_name": "your-endpoint-name",
-      "mlflow_experiment_id": "1234567890"
+      "endpoint_name": "my-agent-endpoint",
+      "display_name": "My Agent",
+      "display_description": "Agent description shown in UI",
+      "chat_title": "Chat Title",
+      "chat_subtitle": "Subtitle shown in chat interface",
+      "llm": "databricks-meta-llama-3-1-70b-instruct",
+      "tools": [
+        {
+          "display_name": "Tool Name",
+          "type": "Genie Room",
+          "display_description": "What this tool does",
+          "url": "https://your-workspace/genie/rooms/..."
+        }
+      ],
+      "mlflow_experiment_id": "1234567890",
+      "mlflow_experiment_url": "https://your-workspace/ml/experiments/1234567890",
+      "mlflow_traces_url": "https://your-workspace/ml/experiments/1234567890/traces"
     }
   ]
 }
 ```
 
 **Key fields:**
-- `deployment_type`: Handler type (`databricks-endpoint`, or future types)
-- `endpoint_name`: Databricks Model Serving endpoint name
-- `mlflow_experiment_id`: Experiment ID for this agent's traces
+- `deployment_type`: Currently only `databricks-endpoint` is implemented (future approaches still TODO)
+- `endpoint_name`: Name of your Databricks Model Serving endpoint
+- `mlflow_experiment_id`: MLflow experiment ID for tracing (configured in agents.json, NOT .env.local)
+- `tools`: Optional array of tools displayed in UI. Clickable to redirect to tool URL (e.g., Genie, Vector Index, etc.)
 
-#### `config/app.json`
+### App Branding (config/app.json)
 
-Application branding and metadata:
+Configure application branding and dashboard settings:
 
 ```json
 {
-  "appName": "Your App Name",
-  "appDescription": "Your app description",
-  "logo": "/logos/logo.png",
-  "theme": {
-    "primaryColor": "#FF3621"
+  "branding": {
+    "tabTitle": "Phoenix",
+    "appName": "Phoenix",
+    "companyName": "Phoenix",
+    "description": "Databricks GenAI App Template",
+    "logoPath": "/logos/u_logo.svg"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Dashboard",
+    "iframeUrl": "",
+    "showPadding": true
   }
 }
 ```
 
-#### `config/about.json`
+**Key fields:**
+- `branding.tabTitle`: Browser tab title
+- `branding.appName`: Application name displayed in UI
+- `branding.companyName`: Company name
+- `branding.logoPath`: Path to logo file in `client/public/`
+- `dashboard.iframeUrl`: Optional URL to embed external dashboard (e.g., AI/BI Dashboard)
+- `dashboard.showPadding`: Whether to add padding around iframe
 
-About page content (Markdown supported):
+### About Page (config/about.json)
 
-```json
-{
-  "title": "About This App",
-  "content": "## Your Content\n\nMarkdown formatted text..."
-}
-```
+The About page displays rich content with sections, images, and call-to-action. Content is structured with:
+- **Hero section**: Title and description shown at top
+- **Sections array**: Multiple content sections with titles, taglines, highlights, and images
+- **CTA section**: Call-to-action button at bottom
 
-### Creating MLflow Experiment
+Example structure shows Databricks Data Intelligence Platform information with sections on data foundations, analytics, architecture, and use cases. Each section includes an image path (stored in `client/public/images/`) and bullet-point highlights.
 
-If you don't have an MLflow experiment ID:
-
-**Via Databricks CLI:**
-```bash
-databricks experiments create --name "/Users/your-email@company.com/genai-app"
-```
-
-**Via Databricks UI:**
-1. Navigate to Machine Learning → Experiments
-2. Click "Create Experiment"
-3. Copy the experiment ID from the URL
-
-**Auto-Creation:**
-The app will automatically create an experiment if the configured ID doesn't exist.
+To customize: Edit the JSON to replace titles, content, highlights, and image paths with your own content. All content supports standard text formatting.
 
 ## Running Locally
 
 ### Start Development Servers
 
 ```bash
-./watch.sh
+./scripts/start_dev.sh
 ```
 
-This script starts:
-- **FastAPI backend** on http://localhost:8000 (uvicorn with hot reload)
-- **React frontend** (Vite dev server proxied through FastAPI)
+**What this script does:**
 
-The script automatically:
-- Loads environment from `.env.local`
-- Regenerates TypeScript API client from OpenAPI spec
-- Opens browser to http://localhost:8000
-- Watches for code changes and auto-reloads
+1. Loads environment from `.env.local`
+2. Activates Python virtual environment
+3. Starts **FastAPI backend** on http://localhost:8000 (uvicorn with auto-reload)
+4. Starts **Next.js frontend** on http://localhost:3000 (with hot reload)
 
-**What you'll see:**
-```
-Starting development servers...
-✓ Backend started (uvicorn)
-✓ Frontend started (vite)
-✓ API client generated
-→ http://localhost:8000
-```
+**Access the application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+
+**Stop servers:**
+Press `Ctrl+C` in the terminal running the script.
 
 ### Development Workflow
 
-**Backend changes:**
-- Edit Python files in `server/`
+**Backend changes (Python files):**
+- Edit files in `server/`
 - uvicorn auto-reloads on save
-- No restart needed
+- Check terminal for logs
 
-**Frontend changes:**
-- Edit React/TypeScript files in `client/`
-- Vite hot-reloads instantly
-- See changes in browser immediately
+**Frontend changes (React/TypeScript):**
+- Edit files in `client/`
+- Next.js hot-reloads instantly
+- Changes appear immediately in browser
 
 **Configuration changes:**
 - Edit `config/*.json` files
 - Refresh browser to see changes
 - No server restart needed
 
-### Stop Development Servers
+### Code Quality
 
+**Format code:**
 ```bash
-# Press Ctrl+C in the terminal running ./watch.sh
-
-# Or kill processes manually:
-pkill -f uvicorn
-pkill -f vite
+./scripts/fix.sh
 ```
+Runs ruff (Python) and prettier (TypeScript/JavaScript).
 
-## Testing
-
-### Test Agent Without UI
-
-Test the agent directly without starting the full web application:
-
+**Run linting and type checks:**
 ```bash
-./test_agent.sh
+./scripts/check.sh
 ```
-
-This script:
-- Executes `server/agents/databricks_assistant/` code directly
-- Shows full JSON response
-- Displays formatted content
-- Useful for debugging agent behavior and tools
-
-**Example output:**
-```
-Testing agent...
-✓ Response received
-✓ Trace ID: req-abc123def456
-
-Content:
----
-Here is the response from the agent...
----
-```
-
-### Format Code
-
-Format all Python and JavaScript code to project standards:
-
-```bash
-./fix.sh
-```
-
-Runs:
-- **ruff** for Python (formatting + auto-fix)
-- **prettier** for TypeScript/JavaScript/CSS
-
-**Always run before committing code.**
-
-### Run Quality Checks
-
-Check code quality without making changes:
-
-```bash
-./check.sh
-```
-
-Runs:
-- **ruff** linting (Python)
-- **TypeScript** type checking (frontend)
+Runs ruff check (Python) and TypeScript compiler checks.
 
 ## Databricks Apps Deployment
 
@@ -325,25 +269,29 @@ Deploy your application to Databricks Apps for production use.
 
 ### Prerequisites
 
-1. **Databricks CLI configured:**
+1. **Databricks CLI authenticated:**
    ```bash
-   databricks auth login
+   databricks auth login --host https://your-workspace.databricks.net
    ```
 
-2. **Environment variables configured in `.env.local`:**
-   - `DATABRICKS_HOST`
-   - `MLFLOW_EXPERIMENT_ID`
-   - App name (optional, defaults in deploy.sh)
+2. **Environment configured in `.env.local`:**
+   ```bash
+   DATABRICKS_HOST=https://your-workspace.databricks.net
+   DATABRICKS_TOKEN=dapi...  # For local dev
+   DATABRICKS_APP_NAME=my-genai-app
+   WORKSPACE_SOURCE_PATH=/Workspace/Users/your.email@company.com/app-template
+   ```
 
 3. **Model Serving endpoint deployed:**
    - Agent must be deployed as Databricks Model Serving endpoint
    - Endpoint name configured in `config/agents.json`
+   - Endpoint must be in `READY` state
 
 ### Deployment Configuration
 
-#### `app.yaml`
+#### app.yaml
 
-Databricks Apps configuration file:
+Databricks Apps configuration (in project root):
 
 ```yaml
 command:
@@ -357,18 +305,17 @@ env:
     value: production
 
   - name: DATABRICKS_HOST
-    value: "https://your-workspace.cloud.databricks.com"
-
-  # MLflow experiment ID (auto-updated by deploy.sh)
-  - name: MLFLOW_EXPERIMENT_ID
-    value: "1234567890"
+    value: "https://your-workspace.databricks.net"
 ```
 
-**Note:** `deploy.sh` automatically updates `MLFLOW_EXPERIMENT_ID` from `.env.local`.
+**Important:**
+- `ENV=production` tells app to use OAuth (not PAT token)
+- `DATABRICKS_HOST` must match your workspace
+- No secrets in app.yaml (uses OAuth in production)
 
-#### `.databricksignore`
+#### .databricksignore
 
-Controls which files are synced to Databricks:
+Controls which files are synced:
 
 ```
 # Exclude from sync
@@ -382,114 +329,71 @@ __pycache__/
 !client/out/
 ```
 
-### Deploy to Databricks Apps
+### Deploy
 
 ```bash
-./deploy.sh
+./scripts/deploy.sh
 ```
 
-**What happens during deployment:**
+**Deployment process:**
 
-1. **Validates configuration:**
-   - Checks `.env.local` exists
-   - Verifies `DATABRICKS_HOST` is set
-   - Validates `MLFLOW_EXPERIMENT_ID`
-
-2. **Updates app.yaml:**
-   - Automatically sets `MLFLOW_EXPERIMENT_ID` from `.env.local`
-
-3. **Builds frontend locally:**
-   - Installs dependencies: `bun install`
-   - Runs production build: `bun run build`
-   - Generates static files in `client/out/`
-
-4. **Syncs to Databricks:**
-   - Uses `.databricksignore` for file filtering
-   - Syncs to `/Workspace/Users/{your-email}/apps/{app-name}`
+1. **Generates requirements.txt** from pyproject.toml
+2. **Builds frontend:**
+   - Runs `npm install`
+   - Runs `npm run build`
+   - Creates `client/out/` with static files
+3. **Syncs to Databricks:**
+   - Uses `.databricksignore` for filtering
+   - Syncs to `WORKSPACE_SOURCE_PATH`
    - Includes `client/out/` build output
-
-5. **Creates/updates app:**
-   - Creates new app or updates existing
+4. **Deploys app:**
+   - Creates/updates app with name from `DATABRICKS_APP_NAME`
    - Configures environment from `app.yaml`
-   - Starts application
+5. **Verifies deployment:**
+   - Checks app appears in `databricks apps list`
 
-**Example output:**
-```
-Deploying to Databricks Apps...
-✓ Building frontend
-✓ Syncing files
-✓ Creating app: my-genai-app
-✓ Deployment successful
 
-App URL: https://my-genai-app-abc123.azuredatabricks.net
-Logs: https://my-genai-app-abc123.azuredatabricks.net/logz
-```
-
-### Verify Deployment
+### Post-Deployment Verification
 
 1. **Check app status:**
    ```bash
    databricks apps list
    ```
-
    Look for your app with status `ACTIVE`.
 
 2. **Access the app:**
-   - Open the app URL from deploy output
-   - You'll be redirected to Databricks OAuth login
+   - Go to your Databricks workspace
+   - Navigate to **Compute → Apps**
+   - Click on your app name
+   - You'll be redirected to OAuth login
    - After authentication, app should load
 
 3. **Test functionality:**
    - Send a test message to the agent
    - Verify response streams correctly
-   - Check trace data appears in MLflow
+   - Check markdown rendering
+   - Test thumbs up/down feedback
 
 4. **Monitor logs:**
-   - Access logs at `{app-url}/logz`
-   - Requires browser authentication
+   - Click "Logs" tab in Databricks Apps UI
+   - Or visit `{app-url}/logz` (requires OAuth)
    - Watch for errors during first interactions
 
-### Update Existing Deployment
+### Update Deployment
 
-To update an already-deployed app:
+To update an existing deployment:
 
 ```bash
-./deploy.sh
+./scripts/deploy.sh
 ```
 
 The script automatically:
 - Detects existing app
-- Updates code and configuration
+- Rebuilds frontend
+- Syncs updated code
 - Restarts app with new version
 
-**No data loss:** Chat history will be lost (in-memory storage), but MLflow traces persist.
-
-### Rollback Deployment
-
-If deployment fails or has issues:
-
-1. **Check app status:**
-   ```bash
-   databricks apps list
-   databricks apps get {app-name}
-   ```
-
-2. **View logs for errors:**
-   ```bash
-   # Via browser (requires OAuth)
-   open https://{app-url}/logz
-   ```
-
-3. **Redeploy previous version:**
-   ```bash
-   git checkout {previous-commit}
-   ./deploy.sh
-   ```
-
-4. **Delete app if needed:**
-   ```bash
-   databricks apps delete {app-name}
-   ```
+**Note:** Chat history will be lost (in-memory storage), but MLflow traces persist.
 
 ## Monitoring and Troubleshooting
 
@@ -503,93 +407,28 @@ curl https://{app-url}/api/health
 Expected response:
 ```json
 {
-  "status": "healthy",
-  "version": "0.1.0"
+  "status": "healthy"
 }
 ```
-
-**MLflow experiment link:**
-```bash
-curl https://{app-url}/api/tracing_experiment
-```
-
-Returns MLflow experiment URL for viewing traces.
 
 ### View Application Logs
 
 **Production (Databricks Apps):**
-- Web UI: `https://{app-url}/logz` (requires OAuth)
-- Logs show FastAPI requests, authentication, agent invocations, errors
+- Web UI: Navigate to app in Databricks workspace → Logs tab
+- Direct URL: `https://{app-url}/logz` (requires OAuth)
+- Shows FastAPI requests, authentication, agent calls, errors
 
 **Local development:**
 - Terminal output shows all logs
-- Use `devLog()` in frontend for client-side debugging
+- Backend: uvicorn logs
+- Frontend: Next.js console logs
 
-### Common Issues
-
-#### "No X-Forwarded-Access-Token header found"
-
-**Cause:** Not running in Databricks Apps environment or OAuth not configured.
-
-**Solution:**
-- Ensure deployed to Databricks Apps (not local dev)
-- Check app.yaml has OAuth enabled (default)
-- Verify user is authenticated
-
-#### "WorkspaceClient did not provide host or token"
-
-**Cause:** Missing DATABRICKS_HOST in environment.
-
-**Solution:**
-- Check `app.yaml` has DATABRICKS_HOST set
-- Verify `.env.local` has DATABRICKS_HOST (for local dev)
-- Check environment variable is loaded correctly
-
-#### "Agent not found" or "Endpoint not found"
-
-**Cause:** Configuration mismatch between `config/agents.json` and deployed endpoint.
-
-**Solution:**
-- Verify `endpoint_name` in `config/agents.json` matches actual endpoint
-- Check endpoint exists: `databricks serving-endpoints list`
-- Verify endpoint is in `READY` state
-
-#### Frontend shows "localhost:8000" errors in production
-
-**Cause:** Frontend environment variable leaked into production build.
-
-**Solution:**
-- Remove `NEXT_PUBLIC_BACKEND_URL` from `.env.local`
-- Keep it only in `.env.development`
-- Rebuild frontend: `cd client && bun run build`
-- Redeploy
-
-#### Chat history lost on deployment
-
-**Expected behavior:** Chat storage is in-memory only.
-
-**Solution:**
-- This is a known limitation (see [TODO.md](TODO.md))
-- MLflow traces persist and can be viewed separately
-- Future: Database storage planned
-
-### Performance Monitoring
-
-**MLflow Experiment:**
-- View all agent traces in MLflow UI
-- Analyze token usage, latency, errors
-- Search by trace ID or time range
-
-**Databricks Apps Metrics:**
-- Check app resource usage in Databricks UI
-- Monitor CPU, memory, request counts
-- View error rates and response times
 
 ### Getting Help
 
-1. **Check existing issues:** [GitHub Issues](https://github.com/databricks-solutions/databricks-genai-app-template/issues)
-2. **Search documentation:** Check other docs in `/docs` folder
-3. **Open new issue:** Include logs, configuration, and error messages
+1. **Check documentation:** Review files in `/docs` folder
+2. **Check existing issues:** [GitHub Issues](https://github.com/databricks-solutions/databricks-genai-app-template/issues)
+3. **Open new issue:** Include logs, configuration (redact secrets), error messages
 4. **Note:** Databricks support doesn't cover this template (community support only)
 
 ---
@@ -597,4 +436,4 @@ Returns MLflow experiment URL for viewing traces.
 **Next Steps:**
 - See [Developer Guide](developer-guide.md) for architecture details and customization
 - See [Feature Documentation](features/) for specific feature details
-- Check [TODO.md](TODO.md) for planned enhancements
+- Check [Limitations & Roadmap](limitations-and-roadmap.md) for planned enhancements

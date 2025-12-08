@@ -1,6 +1,6 @@
 # Databricks GenAI App Template
 
-A comprehensive app template for deploying AI agents with Databricks. 
+A comprehensive app template for interacting with AI agents, leveraging Databricks (Apps, Serving Endpoints, Agent Bricks, AI/BI Dashboards, DBSQL, Unity Catalog). 
 Features extensible agent deployment patterns (through Databricks Serving Endpoint, Agent Bricks Endpoint or local agent), MLflow tracing & feedback collection, user authentication, and a modern React chat interface.
 
 ![Chat Interface](docs/images/chat-ui.png)
@@ -139,14 +139,14 @@ cd databricks-genai-app-template
 
 Open **http://localhost:3000** for the frontend (backend runs on http://localhost:8000)
 
-**Prerequisites:** Python 3.12+, Node.js 18+, Databricks workspace with Unity Catalog
+**Prerequisites:** Python 3.11+, Node.js 18+, Databricks workspace with Unity Catalog (where Serving endpoints will be hosted, or from which Foundation LLM will be served)
 
 See [User Guide](docs/user-guide.md) for complete setup instructions.
 
 ## Development
 
 ```bash
-./scripts/start_dev.sh  # Start both FastAPI (8000) and Next.js (3000)
+./scripts/start_dev.sh  # Start both FastAPI (8000) and Next.js (3000) locally
 ./scripts/fix.sh        # Format code (ruff + prettier)
 ./scripts/check.sh      # Run linting and type checks
 ```
@@ -179,6 +179,7 @@ See [User Guide - Databricks Apps Deployment](docs/user-guide.md#databricks-apps
 ### Features
 
 - **[MLflow Tracing](docs/features/tracing.md)** - Client-side trace display, function call tracking
+- **[User Feedback](docs/features/feedback.md)** - Thumbs up/down collection and MLflow logging
 - **[Chat Storage](docs/features/chat-storage.md)** - In-memory session management (10 chat limit)
 - **[Session Management](docs/features/session-management.md)** - Stream handling, chat switching behavior
 
@@ -191,7 +192,7 @@ See [User Guide - Databricks Apps Deployment](docs/user-guide.md#databricks-apps
 
 ### Reference
 
-- **[TODO](docs/TODO.md)** - Planned enhancements (persistent storage, background processing)
+- **[Limitations & Roadmap](docs/limitations-and-roadmap.md)** - Current limitations and planned improvements
 
 ## Project Structure
 
@@ -221,60 +222,36 @@ databricks-genai-app-template/
 
 ## Customization
 
-### Add Agent Tools
-
-Add custom tools to the LangChain agent in `server/agents/databricks_assistant/tools.py`:
-
-```python
-from langchain_core.tools import tool
-
-@tool
-def my_custom_tool(param: str) -> str:
-    """Tool description for the LLM."""
-    # Your implementation
-    return result
-```
-
 ### Customize UI
-
-Add shadcn/ui components:
-
-```bash
-cd client
-npx shadcn@latest add dialog
-```
 
 Components use [shadcn/ui](https://ui.shadcn.com/) with Tailwind CSS. See `client/tailwind.config.ts` for theme customization.
 
+Users can also click the top right "Edit" button and modify the look and feel (colors, fonts, moving background settings) inplace. 
+
 ### Extend Deployment Types
 
-Add handlers for new agent types (OpenAI, local agents, etc.). See [Developer Guide](docs/developer-guide.md#adding-a-new-deployment-type) for step-by-step instructions.
+Add handlers for new agent types (Agent Bricks, local agents, etc.). See [Developer Guide](docs/developer-guide.md#adding-a-new-deployment-type) for step-by-step instructions.
 
 ## Known Limitations
 
-- **Chat storage is in-memory** - All chats lost on server restart. See [TODO.md](docs/TODO.md) for persistence plans.
-- **Maximum 10 chats** - Oldest chat auto-deleted when limit reached.
-- **Single-response-at-a-time** - Cannot switch chats during streaming. See [TODO.md](docs/TODO.md) for background processing plans.
-- **No message edit/delete** - Append-only message model.
+- **Chat storage is in-memory** - All chats lost on server restart
+- **Maximum 10 chats** - Oldest chat auto-deleted when limit reached
+- **Single-response-at-a-time** - Cannot switch chats during streaming
+- **No message edit/delete** - Append-only message model
+- **Client-side trace display** - No timing data or full MLflow integration
+
+See [Limitations & Roadmap](docs/limitations-and-roadmap.md) for complete details and planned improvements.
 
 ## Troubleshooting
 
-**Port conflicts:**
-```bash
-lsof -i :8000    # Check backend port
-lsof -i :3000    # Check frontend port
-pkill -f uvicorn # Kill FastAPI server
-pkill -f next    # Kill Next.js dev server
-```
-
 **Authentication errors:**
-- **Local dev**: Verify `DATABRICKS_HOST` and `DATABRICKS_TOKEN` in `.env.local`
+- **Local dev**: Verify `DATABRICKS_HOST` and `DATABRICKS_TOKEN` in `.env.local`. DO NOT COMMIT THIS FILE TO GIT. 
 - **Production**: Check `app.yaml` has correct `DATABRICKS_HOST`
 - Check server logs for specific error messages
 
 **Agent not found errors:**
-- Verify `config/agents.json` has correct `endpoint_name`
-- Check endpoint exists: `databricks serving-endpoints list`
+- Verify `config/agents.json` has correct `endpoint_url`
+- Check endpoint exists on your Databricks host
 - Ensure endpoint is in `READY` state
 
 **Databricks Apps deployment fails:**
@@ -302,18 +279,7 @@ Databricks support doesn't cover this content. For questions or bugs, please ope
 
 ## License
 
-© 2025 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the [Databricks License](https://databricks.com/db-license-source). All included or referenced third party libraries are subject to the licenses set forth below.
-
-| library      | description                         | license    | source                                      |
-| ------------ | ----------------------------------- | ---------- | ------------------------------------------- |
-| FastAPI      | Modern web framework for APIs       | MIT        | https://github.com/tiangolo/fastapi         |
-| React        | JavaScript library for UIs          | MIT        | https://github.com/facebook/react           |
-| Next.js      | React framework                     | MIT        | https://github.com/vercel/next.js           |
-| LangChain    | Framework for LLM applications      | MIT        | https://github.com/langchain-ai/langchain   |
-| MLflow       | Machine learning lifecycle platform | Apache 2.0 | https://github.com/mlflow/mlflow            |
-| shadcn/ui    | Re-usable components                | MIT        | https://github.com/shadcn-ui/ui             |
-| Tailwind CSS | Utility-first CSS framework         | MIT        | https://github.com/tailwindlabs/tailwindcss |
-| Recharts     | Composable charting library         | MIT        | https://github.com/recharts/recharts        |
+© 2025 Databricks, Inc. All rights reserved. This repository is provided subject to the [Databricks License](https://databricks.com/db-license-source). 
 
 ---
 
