@@ -86,7 +86,8 @@ class AgentBricksMASHandler(BaseDeploymentHandler):
 
     # State tracking for multi-agent flow
     current_agent = None  # Track which agent is currently speaking
-    supervisor_name = None  # Will be set from first agent name tag
+    supervisor_name = None  # Will be determined as non-specialist agent
+    specialist_names = set()  # Track all specialist names (from function_call events)
     handoffs = []  # List of {specialist, request, response, messages}
     current_handoff = None  # Current specialist interaction being built
     function_calls = []  # All function calls for backward compat
@@ -107,6 +108,15 @@ class AgentBricksMASHandler(BaseDeploymentHandler):
 
           # Handle [DONE] marker
           if line.strip() == 'data: [DONE]' or line.strip() == '[DONE]':
+            # Auto-finalize any pending handoff
+            # (handles function-based specialists without name tags)
+            if current_handoff:
+              handoffs.append(current_handoff)
+              logger.info(
+                f'✅ Handoff auto-finalized at stream end: {current_handoff["specialist"]}'
+              )
+              current_handoff = None
+
             # Build and emit final trace summary before [DONE]
             if handoffs:
               trace_summary = self._build_trace_summary(
@@ -149,14 +159,20 @@ class AgentBricksMASHandler(BaseDeploymentHandler):
                       agent_name = name_match.group(1)
                       logger.info(f'🔄 Agent switch detected: {current_agent} → {agent_name}')
 
-                      # First agent we see is the supervisor
-                      if supervisor_name is None:
+                      # Determine supervisor: any agent that is NOT a specialist
+                      # Specialists are identified from function_call events (added below)
+                      if supervisor_name is None and agent_name not in specialist_names:
                         supervisor_name = agent_name
                         logger.info(f'👔 Supervisor identified: {supervisor_name}')
 
-                      # Switching to a different agent means handoff
+                      # Switching from specialist back to supervisor = handoff complete
                       if current_agent and current_agent != agent_name:
-                        if agent_name == supervisor_name and current_handoff:
+                        # Check if we're returning from a specialist to supervisor
+                        if (
+                          current_agent in specialist_names
+                          and agent_name == supervisor_name
+                          and current_handoff
+                        ):
                           # Returning to supervisor, finalize current handoff
                           handoffs.append(current_handoff)
                           logger.info(f'✅ Handoff complete: {current_handoff["specialist"]}')
@@ -171,6 +187,10 @@ class AgentBricksMASHandler(BaseDeploymentHandler):
                 fc_name = item.get('name', '')
                 fc_args = item.get('arguments', '{}')
                 fc_call_id = item.get('call_id', '')
+
+                # Mark this as a specialist agent (generic - works for any specialist name)
+                specialist_names.add(fc_name)
+                logger.info(f'🏷️  Specialist identified from function call: {fc_name}')
 
                 # Parse arguments
                 try:
