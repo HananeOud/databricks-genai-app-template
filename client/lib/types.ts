@@ -37,10 +37,25 @@ export interface StreamMessageDone {
   id: string;
 }
 
+export interface MASHandoff {
+  specialist: string;
+  request: any;
+  response?: any;
+  message_count: number;
+  messages: string[];
+}
+
+export interface MASFlow {
+  supervisor: string;
+  total_handoffs: number;
+  handoffs: MASHandoff[];
+}
+
 export interface TraceSummary {
   trace_id: string;
   duration_ms: number;
   status: string;
+  deployment_type?: string; // Added to detect handler type
   tools_called: Array<{
     name: string;
     duration_ms: number;
@@ -69,6 +84,7 @@ export interface TraceSummary {
     arguments: any;
     output?: any;
   }>;
+  mas_flow?: MASFlow; // MAS-specific hierarchical structure
 }
 
 export interface Message {

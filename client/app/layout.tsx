@@ -56,9 +56,9 @@ export default function RootLayout({
           closeButton
           toastOptions={{
             style: {
-              background: '#f3f4f6',
-              color: '#1f2937',
-              border: '1px solid #d1d5db',
+              background: "#f3f4f6",
+              color: "#1f2937",
+              border: "1px solid #d1d5db",
             },
           }}
         />

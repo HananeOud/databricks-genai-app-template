@@ -101,8 +101,8 @@ class DatabricksEndpointHandler(BaseDeploymentHandler):
             continue
 
           try:
-            # Parse the JSON event to validate it
-            event = json.loads(json_str)
+            # Parse the JSON event to validate it (don't need result, just validation)
+            _ = json.loads(json_str)
 
             # Forward the event to the client
             yield f'data: {json_str}\n\n'

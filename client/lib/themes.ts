@@ -213,7 +213,7 @@ export const PREDEFINED_THEMES: PredefinedTheme[] = [
       animationSpeed: 1, // Slow, powerful motion
     },
   },
-  
+
   {
     id: "deep-ocean",
     name: "Deep Ocean Dark",

@@ -6,16 +6,16 @@ deployment type (calling external endpoints vs running local agents).
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Tuple, Union
+from typing import Tuple
 
 from databricks.sdk import WorkspaceClient
 from fastapi import Request
 
 from .databricks_auth import (
-    get_databricks_host,
-    get_dev_token,
-    get_user_token_from_request,
-    is_local_development,
+  get_databricks_host,
+  get_dev_token,
+  get_user_token_from_request,
+  is_local_development,
 )
 
 logger = logging.getLogger(__name__)

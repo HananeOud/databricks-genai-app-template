@@ -54,6 +54,7 @@ export function ChatView({
     }>;
     userMessage?: string;
     assistantResponse?: string;
+    masFlow?: any; // MAS-specific supervisor/specialist flow
   }>({ isOpen: false, traceId: "" });
   const [activeFunctionCalls, setActiveFunctionCalls] = useState<
     Array<{
@@ -341,10 +342,7 @@ export function ChatView({
           }
 
           chunkCount++;
-          devLog(
-            `🌊 STREAMING: Chunk ${chunkCount}, bytes:`,
-            value?.length,
-          );
+          devLog(`🌊 STREAMING: Chunk ${chunkCount}, bytes:`, value?.length);
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
@@ -436,10 +434,7 @@ export function ChatView({
               // Handle client_request_id from backend (for MLflow trace linking)
               if (event.type === "trace.client_request_id") {
                 traceId = event.client_request_id;
-                devLog(
-                  "📋 Received client_request_id for trace:",
-                  traceId,
-                );
+                devLog("📋 Received client_request_id for trace:", traceId);
               }
 
               // Handle trace ID (legacy - keeping for backward compatibility)
@@ -454,112 +449,105 @@ export function ChatView({
                 // Handle function call start
                 if (item?.type === "function_call") {
                   devLog("🔧 Function call started:", item.name);
-                  try {
-                    const args = item.arguments
-                      ? typeof item.arguments === "string"
-                        ? JSON.parse(item.arguments)
-                        : item.arguments
-                      : {};
 
-                    // Add to local collected list (for saving to backend)
-                    collectedFunctionCalls.push({
+                  // Parse arguments intelligently: try JSON if it looks like JSON, otherwise keep as-is
+                  let args = item.arguments || {};
+                  if (typeof item.arguments === "string") {
+                    const trimmed = item.arguments.trim();
+                    // Check if string looks like JSON (starts with { or [)
+                    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+                      try {
+                        args = JSON.parse(item.arguments);
+                        devLog("   Parsed arguments as JSON");
+                      } catch {
+                        // Not valid JSON despite looking like it, keep as string
+                        devLog(
+                          "   Arguments look like JSON but failed to parse, keeping as string",
+                        );
+                        args = { raw: item.arguments };
+                      }
+                    } else {
+                      // Plain string arguments, wrap in object
+                      devLog("   Plain string arguments:", item.arguments);
+                      args = { raw: item.arguments };
+                    }
+                  } else if (item.arguments) {
+                    // Already an object
+                    args = item.arguments;
+                  }
+
+                  // Add to local collected list (for saving to backend)
+                  collectedFunctionCalls.push({
+                    call_id: item.call_id,
+                    name: item.name,
+                    arguments: args,
+                  });
+
+                  // Also update state (for real-time notifications UI)
+                  setActiveFunctionCalls((prev) => [
+                    ...prev,
+                    {
                       call_id: item.call_id,
                       name: item.name,
                       arguments: args,
-                    });
-
-                    // Also update state (for real-time notifications UI)
-                    setActiveFunctionCalls((prev) => [
-                      ...prev,
-                      {
-                        call_id: item.call_id,
-                        name: item.name,
-                        arguments: args,
-                        status: "calling",
-                      },
-                    ]);
-                  } catch (argParseError) {
-                    console.error(
-                      "❌ CLIENT: Failed to parse function call arguments:",
-                      argParseError,
-                    );
-
-                    // Add to local collected list even if parsing failed
-                    collectedFunctionCalls.push({
-                      call_id: item.call_id,
-                      name: item.name,
-                      arguments: item.arguments || {},
-                    });
-
-                    setActiveFunctionCalls((prev) => [
-                      ...prev,
-                      {
-                        call_id: item.call_id,
-                        name: item.name,
-                        arguments: item.arguments || {},
-                        status: "calling",
-                      },
-                    ]);
-                  }
+                      status: "calling",
+                    },
+                  ]);
                 }
 
                 // Handle function call output
                 if (item?.type === "function_call_output") {
                   devLog("✅ Function call completed:", item.call_id);
-                  try {
-                    const output = item.output
-                      ? typeof item.output === "string"
-                        ? JSON.parse(item.output)
-                        : item.output
-                      : {};
 
-                    // Update local collected list with output
-                    const fcIndex = collectedFunctionCalls.findIndex(
-                      (fc) => fc.call_id === item.call_id,
-                    );
-                    if (fcIndex !== -1) {
-                      collectedFunctionCalls[fcIndex].output = output;
+                  // Parse output intelligently: try JSON if it looks like JSON, otherwise keep as-is
+                  let output = item.output || {};
+                  if (typeof item.output === "string") {
+                    const trimmed = item.output.trim();
+                    // Check if string looks like JSON (starts with { or [)
+                    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+                      try {
+                        output = JSON.parse(item.output);
+                        devLog("   Parsed output as JSON");
+                      } catch {
+                        // Not valid JSON despite looking like it, keep as string
+                        devLog(
+                          "   Output looks like JSON but failed to parse, keeping as string",
+                        );
+                        output = { message: item.output };
+                      }
+                    } else {
+                      // Plain string (e.g., MAS handoff message), wrap in object
+                      devLog(
+                        "   Plain string output (MAS handoff):",
+                        item.output,
+                      );
+                      output = { message: item.output };
                     }
-
-                    // Also update state (for real-time notifications UI)
-                    setActiveFunctionCalls((prev) =>
-                      prev.map((fc) =>
-                        fc.call_id === item.call_id
-                          ? {
-                              ...fc,
-                              output: output,
-                              status: "completed" as const,
-                            }
-                          : fc,
-                      ),
-                    );
-                  } catch (outputParseError) {
-                    console.error(
-                      "❌ CLIENT: Failed to parse function call output:",
-                      outputParseError,
-                    );
-
-                    // Update local collected list even if parsing failed
-                    const fcIndex = collectedFunctionCalls.findIndex(
-                      (fc) => fc.call_id === item.call_id,
-                    );
-                    if (fcIndex !== -1) {
-                      collectedFunctionCalls[fcIndex].output =
-                        item.output || {};
-                    }
-
-                    setActiveFunctionCalls((prev) =>
-                      prev.map((fc) =>
-                        fc.call_id === item.call_id
-                          ? {
-                              ...fc,
-                              output: item.output || {},
-                              status: "completed" as const,
-                            }
-                          : fc,
-                      ),
-                    );
+                  } else if (item.output) {
+                    // Already an object
+                    output = item.output;
                   }
+
+                  // Update local collected list with output
+                  const fcIndex = collectedFunctionCalls.findIndex(
+                    (fc) => fc.call_id === item.call_id,
+                  );
+                  if (fcIndex !== -1) {
+                    collectedFunctionCalls[fcIndex].output = output;
+                  }
+
+                  // Also update state (for real-time notifications UI)
+                  setActiveFunctionCalls((prev) =>
+                    prev.map((fc) =>
+                      fc.call_id === item.call_id
+                        ? {
+                            ...fc,
+                            output: output,
+                            status: "completed" as const,
+                          }
+                        : fc,
+                    ),
+                  );
                 }
 
                 // Update final text if available
@@ -860,6 +848,7 @@ export function ChatView({
 
     const traceId = message.traceId || "";
     const functionCalls = message.traceSummary?.function_calls;
+    const masFlow = message.traceSummary?.mas_flow;
     const assistantResponse = message.content;
 
     setTraceModal({
@@ -868,6 +857,7 @@ export function ChatView({
       functionCalls: functionCalls,
       userMessage,
       assistantResponse,
+      masFlow,
     });
   };
 
@@ -926,7 +916,6 @@ export function ChatView({
 
       devLog("✅ Feedback logged successfully");
       // Silent success - no toast needed, modal already closed
-
     } catch (error) {
       console.error("Failed to log feedback:", error);
       toast.error("Failed to submit feedback. Please try again.");
@@ -973,6 +962,7 @@ export function ChatView({
         functionCalls={traceModal.functionCalls}
         userMessage={traceModal.userMessage}
         assistantResponse={traceModal.assistantResponse}
+        masFlow={traceModal.masFlow}
       />
 
       {/* Function Call Notification */}

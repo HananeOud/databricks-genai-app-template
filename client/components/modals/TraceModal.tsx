@@ -9,9 +9,11 @@ import {
   Code,
   Database,
   Brain,
+  Users,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TraceSpan } from "@/lib/types";
+import { TraceSpan, MASFlow } from "@/lib/types";
 
 // Dev-only logger
 const devLog = (...args: any[]) => {
@@ -34,6 +36,7 @@ interface TraceModalProps {
   functionCalls?: FunctionCall[];
   userMessage?: string;
   assistantResponse?: string;
+  masFlow?: MASFlow; // MAS-specific supervisor/specialist flow
 }
 
 export function TraceModal({
@@ -43,6 +46,7 @@ export function TraceModal({
   functionCalls,
   userMessage,
   assistantResponse,
+  masFlow,
 }: TraceModalProps) {
   const [traceData, setTraceData] = useState<TraceSpan[] | null>(null);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
@@ -347,7 +351,118 @@ export function TraceModal({
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[var(--color-background)] to-[var(--color-background-secondary)]">
-            {traceData && traceData.length > 0 ? (
+            {masFlow ? (
+              /* MAS Flow Visualization */
+              <div className="max-w-5xl mx-auto space-y-6">
+                {/* Supervisor Header */}
+                <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border-2 border-purple-500/30 p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Users className="h-6 w-6 text-purple-500" />
+                    <h3 className="text-xl font-bold text-[var(--color-foreground)]">
+                      Supervisor Agent
+                    </h3>
+                  </div>
+                  <div className="font-mono text-sm text-[var(--color-muted-foreground)] bg-[var(--color-background)] px-3 py-2 rounded">
+                    {masFlow.supervisor}
+                  </div>
+                  <div className="mt-3 text-sm text-[var(--color-muted-foreground)]">
+                    Total handoffs: {masFlow.total_handoffs}
+                  </div>
+                </div>
+
+                {/* Handoffs */}
+                {masFlow.handoffs.map((handoff, idx) => (
+                  <div key={idx} className="space-y-4">
+                    {/* Handoff Arrow */}
+                    <div className="flex items-center gap-3 ml-8">
+                      <ArrowRight className="h-5 w-5 text-[var(--color-accent)]" />
+                      <div className="text-sm font-medium text-[var(--color-muted-foreground)]">
+                        Handoff #{idx + 1}
+                      </div>
+                    </div>
+
+                    {/* Specialist Card */}
+                    <div className="ml-12 bg-gradient-to-r from-blue-500/10 to-green-500/10 rounded-xl border-2 border-blue-500/30 p-6 space-y-4">
+                      {/* Specialist Header */}
+                      <div className="flex items-center gap-3">
+                        <Brain className="h-6 w-6 text-blue-500" />
+                        <h4 className="text-lg font-bold text-[var(--color-foreground)]">
+                          Specialist Agent
+                        </h4>
+                      </div>
+                      <div className="font-mono text-sm text-[var(--color-muted-foreground)] bg-[var(--color-background)] px-3 py-2 rounded">
+                        {handoff.specialist}
+                      </div>
+
+                      {/* Request */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 pb-2 border-b border-[var(--color-border)]">
+                          <div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+                          <h5 className="text-sm font-bold text-[var(--color-foreground)] uppercase tracking-wide">
+                            Request
+                          </h5>
+                        </div>
+                        <pre className="text-xs font-mono bg-[var(--color-background)] p-3 rounded border border-[var(--color-border)] overflow-x-auto">
+                          {formatValue(handoff.request)}
+                        </pre>
+                      </div>
+
+                      {/* Specialist Messages */}
+                      {handoff.message_count > 0 && (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 pb-2 border-b border-[var(--color-border)]">
+                            <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
+                            <h5 className="text-sm font-bold text-[var(--color-foreground)] uppercase tracking-wide">
+                              Specialist Response ({handoff.message_count}{" "}
+                              messages)
+                            </h5>
+                          </div>
+                          <div className="space-y-2">
+                            {handoff.messages.slice(0, 3).map((msg, msgIdx) => (
+                              <div
+                                key={msgIdx}
+                                className="text-sm bg-[var(--color-background)] p-3 rounded border border-[var(--color-border)]"
+                              >
+                                {msg.length > 200
+                                  ? msg.substring(0, 200) + "..."
+                                  : msg}
+                              </div>
+                            ))}
+                            {handoff.message_count > 3 && (
+                              <div className="text-xs text-[var(--color-muted-foreground)] italic">
+                                + {handoff.message_count - 3} more messages
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Return Arrow */}
+                    <div className="flex items-center gap-3 ml-8">
+                      <ArrowRight className="h-5 w-5 text-[var(--color-accent)] rotate-180" />
+                      <div className="text-sm font-medium text-[var(--color-muted-foreground)]">
+                        Return to Supervisor
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Final Synthesis */}
+                <div className="bg-gradient-to-r from-green-500/10 to-purple-500/10 rounded-xl border-2 border-green-500/30 p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Users className="h-6 w-6 text-green-500" />
+                    <h3 className="text-lg font-bold text-[var(--color-foreground)]">
+                      Supervisor Synthesis
+                    </h3>
+                  </div>
+                  <div className="text-sm text-[var(--color-muted-foreground)]">
+                    Final response synthesized from {masFlow.total_handoffs}{" "}
+                    specialist{masFlow.total_handoffs !== 1 ? "s" : ""}
+                  </div>
+                </div>
+              </div>
+            ) : traceData && traceData.length > 0 ? (
               <div className="max-w-5xl mx-auto">
                 {traceData.map((span, index) =>
                   renderSpan(span, `root-${index}`),
