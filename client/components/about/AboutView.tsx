@@ -3,45 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { SpatialNetworkBackground } from "@/components/background/SpatialNetworkBackground";
 import { useThemeContext } from "@/contexts/ThemeContext";
-import { ArrowRight, Sparkles } from "lucide-react";
-
-interface AboutContent {
-  hero: {
-    title: string;
-    subtitle?: string;
-    description: string;
-  };
-  sections: Array<{
-    id: string;
-    title: string;
-    tagline: string;
-    content: string;
-    highlights: string[];
-    image: string;
-  }>;
-  cta: {
-    title: string;
-    description: string;
-    buttonText: string;
-    buttonLink: string;
-  };
-}
+import { ArrowRight } from "lucide-react";
 
 export function AboutView() {
   const { colors, animatedBackground } = useThemeContext();
-  const [content, setContent] = useState<AboutContent | null>(null);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(
     new Set(),
   );
   const [scrollY, setScrollY] = useState(0);
-
-  // Load content from backend API
-  useEffect(() => {
-    fetch("/api/config/about")
-      .then((res) => res.json())
-      .then((data) => setContent(data))
-      .catch((err) => console.error("Failed to load about content:", err));
-  }, []);
 
   // Scroll tracking for parallax and blur effects
   useEffect(() => {
@@ -57,7 +26,7 @@ export function AboutView() {
       scrollContainer.addEventListener("scroll", handleScroll);
       return () => scrollContainer.removeEventListener("scroll", handleScroll);
     }
-  }, [content]);
+  }, []);
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -77,28 +46,9 @@ export function AboutView() {
       .forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [content]);
+  }, []);
 
-  if (!content) {
-    return (
-      <div className="relative w-full h-full bg-[var(--color-background-1)] flex items-center justify-center">
-        <SpatialNetworkBackground
-          particleCount={animatedBackground.particleCount}
-          connectionDistance={animatedBackground.connectionDistance}
-          primaryColor={colors.animatedBgColor}
-          secondaryColor={colors.animatedBgColor}
-          particleOpacity={animatedBackground.particleOpacity}
-          lineOpacity={animatedBackground.lineOpacity}
-          particleSize={animatedBackground.particleSize}
-          lineWidth={animatedBackground.lineWidth}
-          animationSpeed={animatedBackground.animationSpeed}
-        />
-        <div className="relative text-[var(--color-text-muted)]">
-          Loading...
-        </div>
-      </div>
-    );
-  }
+  const isVisible = (id: string) => visibleSections.has(id);
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-[var(--color-background-1)]">
@@ -154,10 +104,14 @@ export function AboutView() {
           >
             <div className="border-l-4 border-[var(--color-accent-primary)] pl-6 py-4 bg-white/50 backdrop-blur-sm rounded-r-xl shadow-2xl">
               <h1 className="text-3xl md:text-5xl font-bold text-[var(--color-primary-navy)] mb-3 leading-tight">
-                {content.hero.title}
+                Databricks: The Data Intelligence Platform
               </h1>
-              <p className="text-base md:text-lg text-[var(--color-text-primary)] leading-relaxed whitespace-pre-line">
-                {content.hero.description}
+              <p className="text-base md:text-lg text-[var(--color-text-primary)] leading-relaxed">
+                Unified Data & AI capabilities.
+                <br /><br />
+                Databricks offers a unified platform for data, analytics and AI.
+                <br /><br />
+                With the Data Intelligence Platform, Databricks democratizes insights to everyone in an organization. Built on an open lakehouse architecture, the Data Intelligence Platform provides a unified foundation for all data and governance, combined with AI models tuned to an organization&apos;s unique characteristics.
               </p>
             </div>
           </div>
@@ -173,90 +127,199 @@ export function AboutView() {
           >
             {/* Content Sections */}
             <div className="space-y-32">
-              {content.sections.map((section, index) => {
-                const isVisible = visibleSections.has(section.id);
-                const isEven = index % 2 === 0;
 
-                return (
-                  <div
-                    key={section.id}
-                    id={section.id}
-                    data-section
-                    className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center transition-all duration-1000 ${
-                      isVisible
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-12"
-                    } ${isEven ? "" : "md:grid-flow-dense"}`}
-                  >
-                    {/* Text Content */}
-                    <div
-                      className={`${isEven ? "" : "md:col-start-2"} space-y-6`}
-                    >
-                      <div className="inline-block px-3 py-1 bg-[var(--color-accent-primary)]/10 rounded-full">
-                        <span className="text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wide">
-                          {section.tagline}
-                        </span>
-                      </div>
-
-                      <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-text-heading)] leading-tight">
-                        {section.title}
-                      </h2>
-
-                      <p className="text-lg text-[var(--color-text-primary)] leading-relaxed">
-                        {section.content}
-                      </p>
-
-                      {/* Highlights */}
-                      <ul className="space-y-3 mt-6">
-                        {section.highlights.map((highlight, idx) => (
-                          <li
-                            key={idx}
-                            className="flex items-start gap-3 text-[var(--color-text-primary)]"
-                            style={{
-                              animation: isVisible
-                                ? `slide-in 0.5s ease-out ${idx * 0.1}s both`
-                                : "none",
-                            }}
-                          >
-                            <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
-                            <span>{highlight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Image/Visual */}
-                    <div
-                      className={`${isEven ? "" : "md:col-start-1 md:row-start-1"}`}
-                    >
-                      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 group">
-                        {/* Image */}
-                        <img
-                          src={section.image}
-                          alt={section.title}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </div>
+              {/* Section 1: Building the data foundations */}
+              <div
+                id="foundations"
+                data-section
+                className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center transition-all duration-1000 ${
+                  isVisible("foundations") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="space-y-6">
+                  <div className="inline-block px-3 py-1 bg-[var(--color-accent-primary)]/10 rounded-full">
+                    <span className="text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wide">
+                      Unified Data & AI Platform
+                    </span>
                   </div>
-                );
-              })}
+                  <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-text-heading)] leading-tight">
+                    Building the data foundations
+                  </h2>
+                  <p className="text-lg text-[var(--color-text-primary)] leading-relaxed">
+                    Unlocking AI power starts by setting up the right foundations and making your data AI-ready. This means ingesting all the relevant data into the unified data platform, from various sources (files, operational databases, APIs, etc.), and processing it into curated data products, using Databricks capabilities:
+                  </p>
+                  <ul className="space-y-3 mt-6">
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Unity Catalog for centralized governance</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Ingestion, processing & orchestration pipelines with Lakeflow</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Advanced data warehousing with DBSQL</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                    <img src="/images/img1.png" alt="Building the data foundations" className="w-full h-full object-contain" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Unlocking value at every level */}
+              <div
+                id="analytics"
+                data-section
+                className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center transition-all duration-1000 md:grid-flow-dense ${
+                  isVisible("analytics") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="md:col-start-2 space-y-6">
+                  <div className="inline-block px-3 py-1 bg-[var(--color-accent-primary)]/10 rounded-full">
+                    <span className="text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wide">
+                      Descriptive and predictive intelligence
+                    </span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-text-heading)] leading-tight">
+                    Unlocking value at every level
+                  </h2>
+                  <p className="text-lg text-[var(--color-text-primary)] leading-relaxed">
+                    Use the prepared data to build advanced descriptive analytics (what happened), as well predictive ML models and advanced AI agents, using tools built on top of your data (Bring the AI to your data, not the other way around).
+                  </p>
+                  <ul className="space-y-3 mt-6">
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Dashboards & advanced queries (what happened)</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Machine Learning Models (what will happen)</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>AI Agents (root cause, how to respond, etc.)</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="md:col-start-1 md:row-start-1">
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                    <img src="/images/img2.png" alt="Unlocking value at every level" className="w-full h-full object-contain" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: The Databricks Advantage */}
+              <div
+                id="databricks-architecture"
+                data-section
+                className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center transition-all duration-1000 ${
+                  isVisible("databricks-architecture") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="space-y-6">
+                  <div className="inline-block px-3 py-1 bg-[var(--color-accent-primary)]/10 rounded-full">
+                    <span className="text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wide">
+                      Production grade AI
+                    </span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-text-heading)] leading-tight">
+                    The Databricks Advantage
+                  </h2>
+                  <p className="text-lg text-[var(--color-text-primary)] leading-relaxed">
+                    Databricks provides the foundational infrastructure for building production-grade AI applications. From data ingestion to model serving, everything runs on a single, governed platform that scales with your needs.
+                  </p>
+                  <ul className="space-y-3 mt-6">
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Agent Bricks: the fastest way to build agents</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>MLflow for experiment tracking and quality monitoring</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Model serving with guardrails (AI Gateway)</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Unity Catalog for governance and security</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                    <img src="/images/img3.png" alt="The Databricks Advantage" className="w-full h-full object-contain" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Power AI with tools */}
+              <div
+                id="use-cases"
+                data-section
+                className={`grid md:grid-cols-2 gap-12 md:gap-16 items-center transition-all duration-1000 md:grid-flow-dense ${
+                  isVisible("use-cases") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                }`}
+              >
+                <div className="md:col-start-2 space-y-6">
+                  <div className="inline-block px-3 py-1 bg-[var(--color-accent-primary)]/10 rounded-full">
+                    <span className="text-xs font-semibold text-[var(--color-text-primary)] uppercase tracking-wide">
+                      Agent patterns
+                    </span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-text-heading)] leading-tight">
+                    Power AI with tools
+                  </h2>
+                  <p className="text-lg text-[var(--color-text-primary)] leading-relaxed">
+                    From retrieving relevant knowledge from PDFs to querying databases and APIs, tools are the key to getting more operational value from your AI agents.
+                  </p>
+                  <ul className="space-y-3 mt-6">
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Get context from text corpus (RAG)</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Query tables (text-to-sql)</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Combine different tools (multi-tool agent)</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-[var(--color-text-primary)]">
+                      <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-[var(--color-accent-primary)] mt-2" />
+                      <span>Combine and orchestrate different agents</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="md:col-start-1 md:row-start-1">
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                    <img src="/images/img4.png" alt="Power AI with tools" className="w-full h-full object-contain" />
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             {/* CTA Section */}
             <div className="mt-32 text-center">
               <div className="max-w-3xl mx-auto p-12 md:p-16 bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/80 rounded-3xl shadow-2xl">
                 <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-white)] mb-4">
-                  {content.cta.title}
+                  Ready to Build Your AI Future?
                 </h2>
                 <p className="text-lg text-[var(--color-white)]/90 mb-8">
-                  {content.cta.description}
+                  Explore tools and start creating intelligent agents on Databricks.
                 </p>
                 <a
-                  href={content.cta.buttonLink}
+                  href="/tools"
                   className="inline-flex items-center gap-2 px-8 py-4 bg-[var(--color-white)] text-[var(--color-accent-primary)] font-semibold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
                 >
-                  {content.cta.buttonText}
+                  Explore Tools
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </a>
               </div>

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { ChatView } from "@/components/chat/ChatView";
+import { HomeView } from "@/components/home/HomeView";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import { ToolsView } from "@/components/tools/ToolsView";
 import { AboutView } from "@/components/about/AboutView";
@@ -9,7 +10,7 @@ import { SpatialNetworkBackground } from "@/components/background/SpatialNetwork
 import { useThemeContext } from "@/contexts/ThemeContext";
 
 interface MainContentProps {
-  activeTab: "chat" | "dashboard" | "tools" | "about";
+  activeTab: "home" | "chat" | "dashboard" | "tools" | "about";
   currentChatId?: string;
   onChatIdChange?: (chatId: string) => void;
   selectedAgentId?: string;
@@ -61,6 +62,7 @@ export function MainContent({
             onStreamingChange={onStreamingChange}
           />
         </div>
+        {activeTab === "home" && <HomeView />}
         {activeTab === "dashboard" && <DashboardView />}
         {activeTab === "tools" && <ToolsView />}
         {activeTab === "about" && <AboutView />}

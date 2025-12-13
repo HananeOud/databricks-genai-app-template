@@ -1,7 +1,7 @@
 """Configuration loader for the application.
 
-Loads all configuration files from the /config directory at startup.
-Provides a centralized way to access app configuration, agents, and about page content.
+Loads unified configuration from config/app.json at startup.
+All config (branding, agents, home, dashboard, about) is in one file.
 """
 
 import json
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigLoader:
-  """Loads and caches application configuration from JSON files."""
+  """Loads and caches application configuration from app.json."""
 
   def __init__(self, config_dir: Optional[Path] = None):
     """Initialize the config loader.
@@ -27,10 +27,8 @@ class ConfigLoader:
 
     self.config_dir = config_dir
     self._app_config: Optional[Dict[str, Any]] = None
-    self._agents_config: Optional[Dict[str, Any]] = None
-    self._about_config: Optional[Dict[str, Any]] = None
 
-    # Load all configs at initialization
+    # Load config at initialization
     self._load_all()
 
   def _load_json_file(self, filename: str) -> Dict[str, Any]:
@@ -61,37 +59,26 @@ class ConfigLoader:
       return {}
 
   def _load_all(self):
-    """Load all configuration files."""
+    """Load configuration from app.json."""
     logger.info('Loading application configuration...')
 
     self._app_config = self._load_json_file('app.json')
-    self._agents_config = self._load_json_file('agents.json')
-    self._about_config = self._load_json_file('about.json')
 
     # Log summary
-    agent_count = len(self._agents_config.get('agents', []))
+    agent_count = len(self._app_config.get('agents', []))
     logger.info(f'✅ Configuration loaded: {agent_count} agents configured')
 
   @property
   def app_config(self) -> Dict[str, Any]:
-    """Get application configuration (branding, dashboard, etc)."""
+    """Get full application configuration."""
     if self._app_config is None:
       self._app_config = self._load_json_file('app.json')
     return self._app_config
 
   @property
   def agents_config(self) -> Dict[str, Any]:
-    """Get agents configuration."""
-    if self._agents_config is None:
-      self._agents_config = self._load_json_file('agents.json')
-    return self._agents_config
-
-  @property
-  def about_config(self) -> Dict[str, Any]:
-    """Get about page configuration."""
-    if self._about_config is None:
-      self._about_config = self._load_json_file('about.json')
-    return self._about_config
+    """Get agents configuration (from app_config.agents)."""
+    return {'agents': self.app_config.get('agents', [])}
 
   def get_agent_by_id(self, agent_id: str) -> Optional[Dict[str, Any]]:
     """Get a specific agent configuration by ID or endpoint_name.
@@ -106,7 +93,7 @@ class ConfigLoader:
     Returns:
         Agent configuration dict with endpoint_name, or None if not found
     """
-    agents = self.agents_config.get('agents', [])
+    agents = self.app_config.get('agents', [])
     for agent in agents:
       # Handle string format (legacy - just endpoint name)
       if isinstance(agent, str):
@@ -126,11 +113,9 @@ class ConfigLoader:
     return None
 
   def reload(self):
-    """Reload all configuration files from disk."""
+    """Reload configuration from disk."""
     logger.info('Reloading configuration...')
     self._app_config = None
-    self._agents_config = None
-    self._about_config = None
     self._load_all()
 
 

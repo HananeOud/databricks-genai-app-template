@@ -1,10 +1,38 @@
 {
+  "agents": [
+    {
+      "endpoint_name": "mas-209415fd-endpoint"
+    },
+    {
+      "endpoint_name": "my-custom-agent-endpoint",
+      "display_name": "Custom Sales Agent",
+      "display_description": "A custom agent that helps with sales forecasting and pipeline analysis.",
+      "tools": [
+        {
+          "name": "sales_forecast",
+          "display_name": "Sales Forecaster",
+          "description": "Predicts future sales based on historical data and market trends",
+          "type": "function"
+        },
+        {
+          "name": "pipeline_analyzer",
+          "display_name": "Pipeline Analyzer",
+          "description": "Analyzes your sales pipeline and identifies bottlenecks",
+          "type": "function"
+        }
+      ]
+    }
+  ],
   "branding": {
-    "tabTitle": "Phoenix",
-    "appName": "Phoenix",
-    "companyName": "Phoenix",
+    "tabTitle": "Databricks GenAI App Template",
+    "appName": "databricks-genai-app-template",
+    "companyName": "Databricks",
     "description": "Databricks GenAI App Template",
     "logoPath": "/logos/u_logo.svg"
+  },
+  "home": {
+    "title": "Databricks App Template",
+    "description": "Build production-ready AI applications with Databricks. This template provides a complete foundation for creating intelligent agents, chat interfaces, and data-driven dashboards."
   },
   "dashboard": {
     "title": "Dashboard",

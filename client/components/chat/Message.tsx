@@ -26,6 +26,7 @@ interface MessageProps {
   message: MessageType;
   onFeedback: (messageId: string, type: "positive" | "negative") => void;
   onViewTrace: (messageId: string) => void;
+  compact?: boolean;
 }
 
 // Internal CodeBlock helper - renders syntax-highlighted code with copy button (not exported)
@@ -85,7 +86,7 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
   );
 }
 
-export function Message({ message, onFeedback, onViewTrace }: MessageProps) {
+export function Message({ message, onFeedback, onViewTrace, compact = false }: MessageProps) {
   const isUser = message.role === "user";
 
   return (
@@ -95,7 +96,7 @@ export function Message({ message, onFeedback, onViewTrace }: MessageProps) {
       {/* Message Content */}
       <div
         className={`min-w-0 ${isUser ? "items-end" : "items-start"}`}
-        style={{ maxWidth: "70%" }}
+        style={{ maxWidth: compact ? "85%" : "70%" }}
       >
         <div
           className={`

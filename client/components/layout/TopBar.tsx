@@ -2,19 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Edit } from "lucide-react";
 import { getAppConfig, type AppBranding } from "@/lib/config";
 import { useUserInfo } from "@/hooks/useUserInfo";
 
 interface TopBarProps {
-  activeTab: "chat" | "dashboard" | "tools" | "about";
-  onTabChange: (tab: "chat" | "dashboard" | "tools" | "about") => void;
+  activeTab: "home" | "chat" | "dashboard" | "tools" | "about";
+  onTabChange?: (tab: "home" | "chat" | "dashboard" | "tools" | "about") => void; // Optional, Links handle navigation
   onEditModeToggle: () => void;
 }
 
 export function TopBar({
   activeTab,
-  onTabChange,
   onEditModeToggle,
 }: TopBarProps) {
   const [branding, setBranding] = useState<AppBranding>({
@@ -31,10 +31,11 @@ export function TopBar({
   }, []);
 
   const tabs = [
-    { id: "dashboard" as const, label: "Overview" },
-    { id: "chat" as const, label: "Chat" },
-    { id: "tools" as const, label: "Tools" },
-    { id: "about" as const, label: "About" },
+    { id: "home" as const, label: "Home", href: "/" },
+    { id: "dashboard" as const, label: "Dashboard", href: "/dashboard" },
+    { id: "chat" as const, label: "Chat", href: "/chat" },
+    { id: "tools" as const, label: "Tools", href: "/tools" },
+    { id: "about" as const, label: "About", href: "/about" },
   ];
 
   // Extract username part from email for display
@@ -68,9 +69,9 @@ export function TopBar({
           {/* Tab Navigation */}
           <nav className="flex items-center gap-1 relative">
             {tabs.map((tab) => (
-              <button
+              <Link
                 key={tab.id}
-                onClick={() => onTabChange(tab.id)}
+                href={tab.href}
                 className={`
                   relative px-4 py-2 text-sm font-medium transition-colors duration-300
                   ${
@@ -89,7 +90,7 @@ export function TopBar({
                     }}
                   />
                 )}
-              </button>
+              </Link>
             ))}
           </nav>
 

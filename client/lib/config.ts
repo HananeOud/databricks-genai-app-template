@@ -6,12 +6,31 @@
  */
 
 // Type definitions
+export interface AgentTool {
+  name: string;
+  display_name?: string;
+  description?: string;
+  type?: string;
+}
+
+export interface AgentConfig {
+  endpoint_name: string;
+  display_name?: string;
+  display_description?: string;
+  tools?: AgentTool[];
+}
+
 export interface AppBranding {
   tabTitle: string;
   appName: string;
   companyName: string;
   description: string;
   logoPath: string;
+}
+
+export interface HomeConfig {
+  title: string;
+  description: string;
 }
 
 export interface DashboardConfig {
@@ -22,7 +41,9 @@ export interface DashboardConfig {
 }
 
 export interface AppConfig {
+  agents: AgentConfig[];
   branding: AppBranding;
+  home: HomeConfig;
   dashboard: DashboardConfig;
 }
 
@@ -68,12 +89,17 @@ export async function getAppConfig(): Promise<AppConfig> {
 
       // Return fallback config if API fails
       const fallbackConfig: AppConfig = {
+        agents: [],
         branding: {
           tabTitle: "AI Assistant",
           appName: "AI Assistant",
           companyName: "",
           description: "AI-powered assistant",
           logoPath: "/logos/databricks-symbol-color.svg",
+        },
+        home: {
+          title: "Databricks App Template",
+          description: "Build production-ready AI applications with Databricks.",
         },
         dashboard: {
           title: "Dashboard",

@@ -105,11 +105,13 @@ async def get_agents():
 
 @router.get('/config/app')
 async def get_app_config():
-  """Get application configuration (branding, dashboard, etc).
+  """Get unified application configuration.
 
-  Returns:
-  - Branding info (app name, logo, company name)
-  - Dashboard configuration (iframe URL, title, subtitle)
+  Returns all app config from config/app.json:
+  - branding: App name, logo, company name, description
+  - home: Home page title and description
+  - dashboard: Dashboard iframe URL, title, subtitle
+  - about: About page hero, sections, and CTA
   """
   logger.info('Fetching app configuration')
 
@@ -121,28 +123,6 @@ async def get_app_config():
   except Exception as e:
     logger.error(f'Error loading app config: {str(e)}')
     return {'error': f'Failed to load app configuration: {str(e)}'}
-
-
-@router.get('/config/about')
-async def get_about_config():
-  """Get about page configuration.
-
-  Returns:
-  - About page title and content
-  - Video URL
-  - Section content
-  - Images
-  """
-  logger.info('Fetching about page configuration')
-
-  try:
-    about_config = config_loader.about_config
-    logger.info('✅ About page configuration loaded')
-    return about_config
-
-  except Exception as e:
-    logger.error(f'Error loading about config: {str(e)}')
-    return {'error': f'Failed to load about configuration: {str(e)}'}
 
 
 @router.get('/me')
