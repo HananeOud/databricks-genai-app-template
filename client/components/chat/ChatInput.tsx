@@ -96,7 +96,7 @@ export function ChatInput({
   return (
     <div className={compact ? "px-3 py-2 bg-transparent" : "px-6 py-4 bg-transparent"}>
       <div className={compact ? "" : "max-w-4xl mx-auto"}>
-        <div className={`relative bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm shadow-lg border border-[var(--color-border)] focus-within:border-[var(--color-accent-primary)]/60 focus-within:shadow-xl transition-all duration-300 ${compact ? "rounded-2xl" : "rounded-3xl"}`}>
+        <div className={`relative bg-[var(--color-background)]/70 backdrop-blur-xl backdrop-saturate-150 shadow-lg border border-[var(--color-border)]/40 focus-within:border-[var(--color-accent-primary)]/50 focus-within:shadow-xl transition-all duration-300 ${compact ? "rounded-2xl" : "rounded-3xl"}`}>
           {/* Main Input Area */}
           <div className={`flex items-end gap-2 ${compact ? "p-2.5" : "p-4"}`}>
             {/* Text Input */}
@@ -143,7 +143,7 @@ export function ChatInput({
 
                   {/* Agent Dropdown Menu */}
                   {isAgentDropdownOpen && agents.length > 0 && (
-                    <div className={`absolute bottom-full right-0 mb-2 bg-[var(--color-background)] rounded-xl shadow-xl border border-[var(--color-border)] py-2 z-50 ${compact ? "w-[240px]" : "w-[280px]"}`}>
+                    <div className={`absolute bottom-full right-0 mb-2 bg-[var(--color-background)]/95 backdrop-blur-xl rounded-xl shadow-xl border border-[var(--color-border)]/40 py-2 z-50 ${compact ? "w-[240px]" : "w-[280px]"}`}>
                       {agents.map((agent) => (
                         <button
                           key={agent.id}
@@ -151,9 +151,9 @@ export function ChatInput({
                             onAgentChange?.(agent.id);
                             setIsAgentDropdownOpen(false);
                           }}
-                          className={`w-full text-left px-4 py-3 hover:bg-[var(--color-muted)] transition-colors flex items-start justify-between gap-3 ${
+                          className={`w-full text-left px-4 py-3 hover:bg-[var(--color-accent-primary)]/10 transition-colors flex items-start justify-between gap-3 ${
                             selectedAgent === agent.id
-                              ? "bg-[var(--color-muted)]"
+                              ? "bg-[var(--color-accent-primary)]/10"
                               : ""
                           }`}
                         >
@@ -166,7 +166,7 @@ export function ChatInput({
                             </div>
                           </div>
                           {selectedAgent === agent.id && (
-                            <Check className="h-4 w-4 text-[var(--color-primary)] flex-shrink-0 mt-0.5" />
+                            <Check className="h-4 w-4 text-[var(--color-accent-primary)] flex-shrink-0 mt-0.5" />
                           )}
                         </button>
                       ))}
@@ -179,9 +179,9 @@ export function ChatInput({
               <button
                 onClick={handleSend}
                 disabled={!message.trim() || disabled}
-                className={`flex-shrink-0 rounded-lg flex items-center justify-center transition-all duration-300 ${compact ? "h-7 w-7" : "h-8 w-8"} ${
+                className={`flex-shrink-0 rounded-xl flex items-center justify-center transition-all duration-300 ${compact ? "h-7 w-7" : "h-8 w-8"} ${
                   message.trim() && !disabled
-                    ? "bg-[var(--color-primary-navy)] hover:bg-[var(--color-primary-navy)]/80 text-[var(--color-white)] hover:scale-110 shadow-md hover:shadow-lg"
+                    ? "bg-[var(--color-accent-primary)] hover:bg-[var(--color-accent-primary)]/80 text-white hover:scale-105 shadow-md hover:shadow-lg"
                     : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)] cursor-not-allowed opacity-50"
                 }`}
               >

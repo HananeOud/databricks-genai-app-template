@@ -27,6 +27,19 @@
   --color-info: #64b5f6;
   --color-warning: #f5a623;
 
+  /* Derived colors for Tailwind/shadcn button variants */
+  /* These reference the theme colors above and update automatically */
+  --color-primary: var(--color-accent-primary);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-bg-secondary);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-secondary-border: var(--color-border);
+  --color-destructive: var(--color-error);
+  --color-muted: var(--color-bg-secondary);
+  --color-muted-foreground: var(--color-text-muted);
+  --color-accent: var(--color-bg-secondary);
+  --color-accent-foreground: var(--color-text-primary);
+
   /* Spacing - Used by components (not overridden) */
   --spacing-unit: 0.25rem;
   --spacing-xs: calc(var(--spacing-unit) * 1); /* 4px */

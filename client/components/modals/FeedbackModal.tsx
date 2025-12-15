@@ -94,7 +94,7 @@ export function FeedbackModal({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Optional: Share more details about your experience..."
-              className="w-full px-3 py-2 bg-[var(--color-input)] border border-[var(--color-border)] rounded-lg resize-none !outline-none focus:!outline-none focus:!ring-0 focus:!border-[var(--color-border)] focus:!shadow-none transition-all duration-200 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+              className="w-full px-4 py-3 bg-[var(--color-background)]/70 backdrop-blur-sm border border-[var(--color-border)]/50 rounded-xl resize-none outline-none focus:border-[var(--color-accent-primary)]/50 transition-all duration-200 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
               rows={4}
             />
           </div>
@@ -104,12 +104,7 @@ export function FeedbackModal({
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSubmit}
-              className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]"
-            >
-              Submit
-            </Button>
+            <Button onClick={handleSubmit}>Submit</Button>
           </div>
         </div>
       </div>

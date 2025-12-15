@@ -63,14 +63,14 @@ export function ChatWidget({ className = "" }: ChatWidgetProps) {
       {isOpen ? (
         /* Expanded Chat Window */
         <div
-          className="w-[720px] h-[850px] bg-[var(--color-background)] rounded-t-2xl shadow-2xl border border-b-0 border-[var(--color-border)] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200"
+          className="w-[720px] h-[850px] bg-[var(--color-bg-secondary)] backdrop-blur-2xl backdrop-saturate-150 rounded-t-3xl shadow-2xl border border-b-0 border-[var(--color-border)] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-200"
           style={{
             maxHeight: "calc(100vh - 60px)",
             maxWidth: "calc(100vw - 48px)",
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-background)] cursor-pointer hover:bg-[var(--color-muted)]/50 transition-colors" onClick={() => setIsOpen(false)}>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]/40 bg-[var(--color-bg-secondary)]/60 backdrop-blur-md cursor-pointer hover:bg-[var(--color-accent-primary)]/10 transition-colors" onClick={() => setIsOpen(false)}>
             <div className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-[var(--color-accent-primary)]" />
               <span className="font-medium text-sm text-[var(--color-foreground)]">
@@ -164,10 +164,10 @@ export function ChatWidget({ className = "" }: ChatWidgetProps) {
         /* Collapsed Bar */
         <button
           onClick={() => setIsOpen(true)}
-          className="w-[400px] px-4 py-3 bg-[var(--color-background)] rounded-t-2xl shadow-2xl border border-b-0 border-[var(--color-border)] flex items-center gap-3 hover:border-[var(--color-accent-primary)]/50 hover:shadow-xl transition-all duration-300 group cursor-pointer"
+          className="w-[400px] px-4 py-3 bg-[var(--color-bg-secondary)] backdrop-blur-xl backdrop-saturate-150 rounded-t-2xl shadow-xl border border-b-0 border-[var(--color-border)] flex items-center gap-3 hover:border-[var(--color-accent-primary)]/50 hover:shadow-2xl transition-all duration-300 group cursor-pointer"
           style={{ maxWidth: "calc(100vw - 48px)" }}
         >
-          <div className="h-10 w-10 rounded-xl bg-[var(--color-accent-primary)] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/80 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform shadow-lg">
             <MessageSquare className="h-5 w-5 text-white" />
           </div>
           <div className="flex-1 text-left">

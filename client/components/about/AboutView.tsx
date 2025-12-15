@@ -51,7 +51,7 @@ export function AboutView() {
   const isVisible = (id: string) => visibleSections.has(id);
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-[var(--color-background-1)]">
+    <div className="relative w-full overflow-hidden bg-[var(--color-background)] -mt-[var(--header-height)]" style={{ height: 'calc(100% + var(--header-height))' }}>
       {/* Three.js Spatial Network Background */}
       <SpatialNetworkBackground
         particleCount={animatedBackground.particleCount}
@@ -102,8 +102,8 @@ export function AboutView() {
               visibility: scrollY > 250 ? "hidden" : "visible",
             }}
           >
-            <div className="border-l-4 border-[var(--color-accent-primary)] pl-6 py-4 bg-white/50 backdrop-blur-sm rounded-r-xl shadow-2xl">
-              <h1 className="text-3xl md:text-5xl font-bold text-[var(--color-primary-navy)] mb-3 leading-tight">
+            <div className="border-l-4 border-[var(--color-accent-primary)] pl-6 py-4 bg-white/60 backdrop-blur-xl rounded-r-xl shadow-2xl">
+              <h1 className="text-3xl md:text-5xl font-bold text-[var(--color-text-heading)] mb-3 leading-tight">
                 Databricks: The Data Intelligence Platform
               </h1>
               <p className="text-base md:text-lg text-[var(--color-text-primary)] leading-relaxed">
@@ -120,7 +120,7 @@ export function AboutView() {
         {/* Rest of Content - Scrolls over the video with backdrop */}
         <div className="relative z-10">
           <div
-            className="max-w-7xl mx-auto px-6 md:px-8 py-16 md:py-24 bg-[var(--color-background-1)]/95 backdrop-blur-xl rounded-t-3xl shadow-2xl"
+            className="max-w-7xl mx-auto px-6 md:px-8 py-16 md:py-24 bg-[var(--color-background)]/95 backdrop-blur-xl rounded-t-3xl shadow-2xl"
             style={{
               transform: `translateY(${-scrollY / 10}px)`,
             }}
@@ -164,7 +164,7 @@ export function AboutView() {
                   </ul>
                 </div>
                 <div>
-                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background)]/80 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 border border-[var(--color-border)]/30">
                     <img src="/images/img1.png" alt="Building the data foundations" className="w-full h-full object-contain" />
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export function AboutView() {
                   </ul>
                 </div>
                 <div className="md:col-start-1 md:row-start-1">
-                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background)]/80 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 border border-[var(--color-border)]/30">
                     <img src="/images/img2.png" alt="Unlocking value at every level" className="w-full h-full object-contain" />
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export function AboutView() {
                   </ul>
                 </div>
                 <div>
-                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background)]/80 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 border border-[var(--color-border)]/30">
                     <img src="/images/img3.png" alt="The Databricks Advantage" className="w-full h-full object-contain" />
                   </div>
                 </div>
@@ -298,7 +298,7 @@ export function AboutView() {
                   </ul>
                 </div>
                 <div className="md:col-start-1 md:row-start-1">
-                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background-1)]/95 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105">
+                  <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-background)]/80 backdrop-blur-xl shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 border border-[var(--color-border)]/30">
                     <img src="/images/img4.png" alt="Power AI with tools" className="w-full h-full object-contain" />
                   </div>
                 </div>
@@ -309,15 +309,15 @@ export function AboutView() {
             {/* CTA Section */}
             <div className="mt-32 text-center">
               <div className="max-w-3xl mx-auto p-12 md:p-16 bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/80 rounded-3xl shadow-2xl">
-                <h2 className="text-3xl md:text-4xl font-bold text-[var(--color-white)] mb-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                   Ready to Build Your AI Future?
                 </h2>
-                <p className="text-lg text-[var(--color-white)]/90 mb-8">
+                <p className="text-lg text-white/90 mb-8">
                   Explore tools and start creating intelligent agents on Databricks.
                 </p>
                 <a
                   href="/tools"
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-[var(--color-white)] text-[var(--color-accent-primary)] font-semibold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[var(--color-accent-primary)] font-semibold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
                 >
                   Explore Tools
                   <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />

@@ -39,11 +39,14 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="h-screen bg-[var(--color-background)] flex flex-col overflow-hidden">
-      {/* Top Bar */}
+      {/* Top Bar - Fixed position, floats above content */}
       <TopBar
         activeTab={activeTab}
         onEditModeToggle={() => setIsEditMode(!isEditMode)}
       />
+
+      {/* Spacer for fixed header */}
+      <div className="flex-shrink-0 h-[var(--header-height)]" />
 
       {/* Main Layout */}
       <div className="flex-1 flex relative overflow-hidden">
@@ -82,7 +85,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 flex flex-col h-full relative bg-[var(--color-background-1)] overflow-hidden">
+        <main className="flex-1 flex flex-col h-full relative bg-[var(--color-background)] overflow-hidden">
           {/* Background - Only show on home page */}
           {activeTab === "home" && (
             <SpatialNetworkBackground

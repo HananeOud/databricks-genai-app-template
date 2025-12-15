@@ -16,13 +16,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { PREDEFINED_THEMES } from "@/lib/themes";
 
-// Dev-only logger
-const devLog = (...args: any[]) => {
-  if (process.env.NODE_ENV !== "production") {
-    console.log(...args);
-  }
-};
-
 interface EditModePanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -90,12 +83,6 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
     const customThemesList = getCustomThemes();
     setCustomThemes(customThemesList);
 
-    devLog("🎨 Theme detection - Current state:", {
-      colors,
-      typography,
-      animatedBackground,
-    });
-
     // Check if current settings match any predefined theme
     const matchingTheme = PREDEFINED_THEMES.find((theme) => {
       const colorsMatch = isDeepEqual(theme.colors, colors);
@@ -105,17 +92,10 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
         animatedBackground,
       );
 
-      devLog(`🎨 Checking theme "${theme.name}":`, {
-        colorsMatch,
-        typographyMatch,
-        animatedBgMatch,
-      });
-
       return colorsMatch && typographyMatch && animatedBgMatch;
     });
 
     if (matchingTheme) {
-      devLog(`✅ Found matching predefined theme: ${matchingTheme.name}`);
       setSelectedTheme(matchingTheme.id);
     } else {
       // Check if it matches a custom theme
@@ -127,10 +107,8 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
         );
       });
       if (matchingCustom) {
-        devLog(`✅ Found matching custom theme: ${matchingCustom.name}`);
         setSelectedTheme(matchingCustom.id);
       } else {
-        devLog("❌ No matching theme found - settings have been customized");
         setSelectedTheme(null);
       }
     }
@@ -203,7 +181,6 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
 
   const handleGenerateTheme = async () => {
     // Coming soon feature - not yet implemented
-    devLog("Generate theme feature coming soon");
   };
 
   const handleResetToDefaults = () => {
@@ -225,7 +202,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
       className={`
         fixed right-0 top-[var(--header-height)] h-[calc(100vh-var(--header-height))] 
         w-[400px] bg-[var(--color-background)] border-l border-[var(--color-border)]
-        shadow-xl z-20 transform transition-transform duration-300
+        shadow-xl z-[60] transform transition-transform duration-300
         ${isOpen ? "translate-x-0" : "translate-x-full"}
       `}
     >
@@ -251,7 +228,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
             onClick={() => setActiveTab("predefined")}
             className={`flex-1 p-3 text-sm font-medium transition-colors ${
               activeTab === "predefined"
-                ? "text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]"
+                ? "text-[var(--color-accent-primary)] border-b-2 border-[var(--color-accent-primary)]"
                 : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
             }`}
           >
@@ -262,7 +239,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
             onClick={() => setActiveTab("customize")}
             className={`flex-1 p-3 text-sm font-medium transition-colors ${
               activeTab === "customize"
-                ? "text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]"
+                ? "text-[var(--color-accent-primary)] border-b-2 border-[var(--color-accent-primary)]"
                 : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
             }`}
           >
@@ -273,7 +250,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
             onClick={() => setActiveTab("import")}
             className={`flex-1 p-3 text-sm font-medium transition-colors ${
               activeTab === "import"
-                ? "text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]"
+                ? "text-[var(--color-accent-primary)] border-b-2 border-[var(--color-accent-primary)]"
                 : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
             }`}
           >
@@ -301,8 +278,8 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                         p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
                         ${
                           selectedTheme === theme.id
-                            ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                            : "border-[var(--color-border)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-muted)]"
+                            ? "border-[var(--color-accent-primary)] bg-[var(--color-accent-primary)]/5"
+                            : "border-[var(--color-border)] hover:border-[var(--color-accent-primary)]/50 hover:bg-[var(--color-muted)]"
                         }
                       `}
                     >
@@ -316,7 +293,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                           </p>
                         </div>
                         {selectedTheme === theme.id && (
-                          <Check className="h-5 w-5 text-[var(--color-primary)] flex-shrink-0" />
+                          <Check className="h-5 w-5 text-[var(--color-accent-primary)] flex-shrink-0" />
                         )}
                       </div>
 
@@ -359,8 +336,8 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                           p-4 rounded-lg border-2 transition-all duration-200
                           ${
                             selectedTheme === theme.id
-                              ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                              : "border-[var(--color-border)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-muted)]"
+                              ? "border-[var(--color-accent-primary)] bg-[var(--color-accent-primary)]/5"
+                              : "border-[var(--color-border)] hover:border-[var(--color-accent-primary)]/50 hover:bg-[var(--color-muted)]"
                           }
                         `}
                       >
@@ -378,7 +355,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                           </div>
                           <div className="flex items-center gap-2">
                             {selectedTheme === theme.id && (
-                              <Check className="h-5 w-5 text-[var(--color-primary)] flex-shrink-0" />
+                              <Check className="h-5 w-5 text-[var(--color-accent-primary)] flex-shrink-0" />
                             )}
                             <button
                               onClick={(e) => {
@@ -430,7 +407,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
           {activeTab === "customize" && (
             <div className="space-y-6">
               {/* Header with explanation */}
-              <div className="bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm rounded-2xl p-4 border border-[var(--color-border)]">
+              <div className="bg-[var(--color-background)]/80 backdrop-blur-sm rounded-2xl p-4 border border-[var(--color-border)]">
                 <p className="text-sm text-[var(--color-foreground)] font-medium">
                   Simplified Theme Customization
                 </p>
@@ -570,7 +547,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       onChange={(e) =>
                         updateTypography({ primaryFont: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)]"
                     >
                       {fontOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -589,7 +566,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       onChange={(e) =>
                         updateTypography({ secondaryFont: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)]"
                     >
                       {fontOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -797,7 +774,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       value={themeName}
                       onChange={(e) => setThemeName(e.target.value)}
                       placeholder="My Custom Theme"
-                      className="w-full px-4 py-2.5 bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
                     />
                   </div>
                   <div>
@@ -809,13 +786,13 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       value={themeDescription}
                       onChange={(e) => setThemeDescription(e.target.value)}
                       placeholder="A beautiful custom theme"
-                      className="w-full px-4 py-2.5 bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
                     />
                   </div>
                   <Button
                     onClick={handleSaveTheme}
                     disabled={!themeName.trim()}
-                    className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     Save Theme
@@ -828,7 +805,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
           {/* Import Tab */}
           {activeTab === "import" && (
             <div className="space-y-4">
-              <div className="bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl p-4 mb-4">
+              <div className="bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl p-4 mb-4">
                 <p className="text-sm text-[var(--color-muted-foreground)] text-center">
                   🚧 Coming Soon
                 </p>
@@ -847,7 +824,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://example.com"
                   disabled
-                  className="w-full px-4 py-2.5 bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                  className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
                 />
               </div>
 
@@ -860,7 +837,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Describe the style you want (e.g., 'Modern and minimalist with blue accents')"
                   disabled
-                  className="w-full px-4 py-2.5 bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl resize-none outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                  className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl resize-none outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
                   rows={3}
                 />
               </div>
@@ -868,7 +845,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
               <Button
                 onClick={handleGenerateTheme}
                 disabled
-                className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] opacity-50 cursor-not-allowed"
+                className="w-full"
               >
                 Generate Theme (Coming Soon)
               </Button>
@@ -885,10 +862,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
           >
             Reset to Default
           </Button>
-          <Button
-            onClick={onClose}
-            className="flex-1 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)]"
-          >
+          <Button onClick={onClose} className="flex-1">
             Apply Changes
           </Button>
         </div>
@@ -933,7 +907,7 @@ function ColorPicker({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 px-4 py-2.5 bg-[var(--color-bg-elevated)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 font-mono text-sm text-[var(--color-foreground)]"
+          className="flex-1 px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 font-mono text-sm text-[var(--color-foreground)]"
         />
       </div>
     </div>

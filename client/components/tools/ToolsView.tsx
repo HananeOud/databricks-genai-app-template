@@ -194,7 +194,7 @@ export function ToolsView() {
   };
 
   return (
-    <div className="w-full h-full bg-[var(--color-bg-primary)] overflow-y-auto">
+    <div className="w-full h-full bg-transparent overflow-y-auto">
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="text-center mb-8">
@@ -212,7 +212,7 @@ export function ToolsView() {
             <div className="relative agent-selector">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-secondary)] hover:border-[var(--color-accent-primary)] transition-colors max-w-[400px]"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-border)]/40 bg-[var(--color-background)]/70 backdrop-blur-xl hover:border-[var(--color-accent-primary)]/50 transition-colors max-w-[400px]"
               >
                 <span className="text-sm text-[var(--color-text-muted)] flex-shrink-0">
                   Agent:
@@ -225,7 +225,7 @@ export function ToolsView() {
                 />
               </button>
               {isDropdownOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 min-w-[280px] max-w-[400px] rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-elevated)] shadow-lg py-1 z-50">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 min-w-[280px] max-w-[400px] rounded-xl border border-[var(--color-border)]/40 bg-[var(--color-background)]/95 backdrop-blur-xl shadow-xl py-1 z-50">
                   {agents.map((agent) => (
                     <button
                       key={agent.id}
@@ -233,7 +233,7 @@ export function ToolsView() {
                         setSelectedAgentId(agent.id);
                         setIsDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2.5 text-sm hover:bg-[var(--color-bg-secondary)] ${selectedAgentId === agent.id ? "bg-[var(--color-bg-secondary)]" : ""}`}
+                      className={`w-full text-left px-3 py-2.5 text-sm hover:bg-[var(--color-accent-primary)]/10 ${selectedAgentId === agent.id ? "bg-[var(--color-accent-primary)]/10" : ""}`}
                     >
                       <span className="text-[var(--color-text-primary)] block truncate">
                         {agent.display_name}
@@ -252,7 +252,7 @@ export function ToolsView() {
             {/* Orchestrator Node - Top of DAG */}
             <div className="flex justify-center mb-2">
               <div className="relative">
-                <div className="rounded-2xl border-2 border-[var(--color-accent-primary)] bg-[var(--color-bg-secondary)] shadow-lg overflow-hidden w-[640px]">
+                <div className="rounded-2xl border-2 border-[var(--color-accent-primary)]/50 bg-[var(--color-background)]/70 backdrop-blur-xl shadow-lg overflow-hidden w-[640px]">
                   <div
                     className="px-5 py-4"
                     style={{
@@ -386,7 +386,7 @@ export function ToolsView() {
             )}
 
             {tools.length === 0 && (
-              <div className="text-center py-12 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
+              <div className="text-center py-12 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg-secondary)] backdrop-blur-xl">
                 <Bot className="h-10 w-10 mx-auto text-[var(--color-text-muted)] opacity-40 mb-3" />
                 <p className="text-sm text-[var(--color-text-muted)]">
                   No tools configured for this agent
@@ -443,7 +443,7 @@ function ToolNode({
 
   return (
     <div
-      className="rounded-xl border-2 bg-[var(--color-bg-secondary)] overflow-hidden transition-all duration-200 hover:shadow-md"
+      className="rounded-xl border-2 bg-[var(--color-background)]/70 backdrop-blur-xl overflow-hidden transition-all duration-200 hover:shadow-lg"
       style={{ borderColor: `${config.color}40` }}
     >
       {/* Color accent bar */}
@@ -539,7 +539,7 @@ function ToolNode({
             {tool.volumes?.map((vol, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2 p-2 rounded-lg bg-[var(--color-bg-primary)]"
+                className="flex items-start gap-2 p-2 rounded-lg bg-[var(--color-muted)]/30"
               >
                 <FolderOpen
                   className="h-4 w-4 mt-0.5 flex-shrink-0"
@@ -571,8 +571,8 @@ function ToolNode({
 
             {/* Tables */}
             {tool.tables && tool.tables.length > 0 && (
-              <div className="rounded-lg bg-[var(--color-bg-primary)] overflow-hidden">
-                <div className="px-2 py-1.5 bg-[var(--color-bg-tertiary)] border-b border-[var(--color-border)] flex items-center justify-between">
+              <div className="rounded-lg bg-[var(--color-muted)]/20 overflow-hidden">
+                <div className="px-2 py-1.5 bg-[var(--color-muted)]/30 border-b border-[var(--color-border)]/50 flex items-center justify-between">
                   <span className="text-[10px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
                     Tables
                   </span>

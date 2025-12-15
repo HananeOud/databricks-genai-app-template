@@ -42,7 +42,7 @@ export function TopBar({
   const displayName = userInfo?.user?.split("@")[0] || "";
 
   return (
-    <header className="sticky top-0 z-30 w-full h-[var(--header-height)] bg-[var(--color-background-2)] backdrop-blur-lg border-b border-[var(--color-border)]">
+    <header className="fixed top-0 left-0 right-0 z-30 h-[var(--header-height)] bg-[var(--color-background)]/70 backdrop-blur-xl backdrop-saturate-150 border-b border-[var(--color-border)]/40 shadow-sm">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
         {/* Left Section - Logo & Company Name */}
         <div className="flex items-center gap-4">
@@ -108,10 +108,10 @@ export function TopBar({
             {/* User Email */}
             {displayName && (
               <div
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-bg-tertiary)] border border-[var(--color-border)]"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-bg-secondary)] backdrop-blur-md border border-[var(--color-border)] shadow-sm hover:shadow-md transition-shadow"
                 title={userInfo?.user}
               >
-                <div className="w-6 h-6 rounded-full bg-[var(--color-accent-primary)] flex items-center justify-center text-white text-xs font-medium">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/80 flex items-center justify-center text-white text-xs font-medium shadow-sm">
                   {displayName.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-sm text-[var(--color-text-primary)] max-w-[120px] truncate">

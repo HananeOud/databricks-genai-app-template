@@ -66,51 +66,51 @@ export const PREDEFINED_THEMES: PredefinedTheme[] = [
   {
     id: "default",
     name: "Default Light",
-    description: "Clean light theme with navy and warm neutrals",
+    description: "Modern light theme inspired by Apple liquid glass",
     isDefault: true,
     colors: {
-      // TEXT COLORS
-      textHeading: "#1B3139",
-      textPrimary: "#2D4A54",
-      textMuted: "#6B7C84",
+      // TEXT COLORS - Soft, refined grays for elegance
+      textHeading: "#1C1C1E", // Apple-style near-black
+      textPrimary: "#3A3A3C", // Soft dark gray for readability
+      textMuted: "#8E8E93", // Apple system gray
 
-      // BRAND/ACCENT (single color, others auto-derived)
-      accentPrimary: "#1B3139",
+      // BRAND/ACCENT - Modern vibrant blue
+      accentPrimary: "#007AFF", // Apple system blue
 
-      // ANIMATED BACKGROUND
-      animatedBgColor: "#1B3139",
+      // ANIMATED BACKGROUND - Subtle, elegant
+      animatedBgColor: "#007AFF",
 
-      // BACKGROUNDS (two-tier, others auto-derived)
-      bgPrimary: "#F9F7F4",
-      bgSecondary: "#EEEDE9",
+      // BACKGROUNDS - Soft, frosted glass feel
+      bgPrimary: "#FFFFFF", // Pure white for clarity
+      bgSecondary: "#F2F2F7", // Apple system gray background
 
-      // UI ELEMENTS
-      border: "#B5B3AD",
+      // UI ELEMENTS - Very subtle borders
+      border: "#D1D1D6", // Apple system gray for borders
 
-      // STATUS COLORS (semantic, not editable in UI)
-      success: "#10B981",
-      successHover: "#D1FAE5",
-      error: "#EF4444",
-      errorHover: "#FEE2E2",
-      info: "#3B82F6",
-      infoHover: "#DBEAFE",
-      warning: "#F59E0B",
-      warningHover: "#FEF3C7",
+      // STATUS COLORS - Vibrant but balanced
+      success: "#34C759", // Apple green
+      successHover: "#E8F9ED",
+      error: "#FF3B30", // Apple red
+      errorHover: "#FFEBE9",
+      info: "#007AFF", // Apple blue
+      infoHover: "#E5F1FF",
+      warning: "#FF9500", // Apple orange
+      warningHover: "#FFF4E5",
     },
     typography: {
       primaryFont:
-        '"Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        '"Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif',
       secondaryFont:
-        '"DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        '"Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif',
     },
     animatedBackground: {
-      particleCount: 60,
-      connectionDistance: 65,
-      particleOpacity: 0.6,
-      lineOpacity: 0.8,
-      particleSize: 5,
-      lineWidth: 3.8,
-      animationSpeed: 1.2,
+      particleCount: 45,
+      connectionDistance: 70,
+      particleOpacity: 0.3,
+      lineOpacity: 0.2,
+      particleSize: 3,
+      lineWidth: 1.5,
+      animationSpeed: 0.8,
     },
   },
   {

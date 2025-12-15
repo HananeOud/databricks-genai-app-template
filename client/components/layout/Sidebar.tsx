@@ -169,17 +169,17 @@ export function Sidebar({
     <>
       {/* Header */}
       <div
-        className={`${isCollapsed ? "p-2" : "p-4"} border-b border-[var(--color-primary-navy)]/10 backdrop-blur-sm transition-all duration-300`}
+        className={`${isCollapsed ? "p-2" : "p-4"} border-b border-[var(--color-border)]/20 transition-all duration-300`}
       >
         <button
           onClick={onNewChat}
-          className={`flex items-center w-full hover:bg-[var(--color-primary-navy)]/[0.06] rounded-xl transition-all duration-300 group ${isCollapsed ? "p-2 justify-center" : "p-3 gap-3"}`}
+          className={`flex items-center w-full hover:bg-[var(--color-accent-primary)]/[0.08] rounded-xl transition-all duration-300 group ${isCollapsed ? "p-2 justify-center" : "p-3 gap-3"}`}
         >
-          <div className="flex items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-primary-navy)] via-[var(--color-primary-navy)]/80 to-[var(--color-primary-navy)] text-[var(--color-white)] transition-all duration-300 shadow-md group-hover:shadow-xl group-hover:scale-105 h-10 w-10 flex-shrink-0">
+          <div className="flex items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/80 text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:scale-105 h-10 w-10 flex-shrink-0">
             <Plus className="h-5 w-5" strokeWidth={2.5} />
           </div>
           {!isCollapsed && (
-            <span className="text-[var(--color-primary-navy)] font-semibold text-[15px] transition-opacity duration-300">
+            <span className="text-[var(--color-text-heading)] font-semibold text-[15px] transition-opacity duration-300">
               New Chat
             </span>
           )}
@@ -209,8 +209,8 @@ export function Sidebar({
                     group relative px-2.5 py-2 rounded-lg cursor-pointer transition-all duration-200
                     ${
                       currentChatId === chat.id
-                        ? "bg-gradient-to-br from-[var(--color-primary-navy)] via-[var(--color-primary-navy)]/90 to-[var(--color-primary-navy)] text-[var(--color-white)] shadow-sm border border-[var(--color-primary-navy)]/10"
-                        : "bg-[var(--color-white)]/40 hover:bg-[var(--color-white)]/70 text-[var(--color-foreground)] border border-transparent hover:border-[var(--color-primary-navy)]/15"
+                        ? "bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/85 text-white shadow-md"
+                        : "bg-[var(--color-background)] hover:bg-[var(--color-background)]/80 text-[var(--color-foreground)] border border-[var(--color-border)]/50 hover:border-[var(--color-border)] hover:shadow-sm"
                     }
                   `}
                 >
@@ -234,8 +234,8 @@ export function Sidebar({
                         <h3
                           className={`font-medium text-xs truncate flex-1 ${
                             currentChatId === chat.id
-                              ? "text-[var(--color-white)]"
-                              : "text-[var(--color-primary-navy)]"
+                              ? "text-white"
+                              : "text-[var(--color-text-heading)]"
                           }`}
                         >
                           {chat.title}
@@ -243,8 +243,8 @@ export function Sidebar({
                         <span
                           className={`text-[10px] flex-shrink-0 ${
                             currentChatId === chat.id
-                              ? "text-[var(--color-white)]/60"
-                              : "text-[var(--color-primary-navy)]/40"
+                              ? "text-white/60"
+                              : "text-[var(--color-text-muted)]"
                           }`}
                         >
                           {formatDistanceToNow(chat.timestamp, {
@@ -255,8 +255,8 @@ export function Sidebar({
                       <p
                         className={`text-[11px] mt-0.5 truncate ${
                           currentChatId === chat.id
-                            ? "text-[var(--color-white)]/70"
-                            : "text-[var(--color-primary-navy)]/50"
+                            ? "text-white/70"
+                            : "text-[var(--color-text-muted)]"
                         }`}
                       >
                         {chat.preview}
@@ -305,7 +305,7 @@ export function Sidebar({
 
       {/* Tools Section at Bottom */}
       <div
-        className={`mt-auto border-t border-[var(--color-primary-navy)]/10 backdrop-blur-sm overflow-visible ${isCollapsed ? "p-2" : "p-3"}`}
+        className={`mt-auto border-t border-[var(--color-border)]/20 overflow-visible ${isCollapsed ? "p-2" : "p-3"}`}
       >
         {!isCollapsed ? (
           <div className="space-y-2">
@@ -451,7 +451,7 @@ export function Sidebar({
         <aside
           className={`
             fixed left-0 top-0 h-full w-[var(--sidebar-width)]
-            bg-[var(--color-background-2)] border-r border-[var(--color-primary-navy)]/15
+            bg-[var(--color-background)]/80 backdrop-blur-xl backdrop-saturate-150 border-r border-[var(--color-border)]/30 shadow-lg
             transform transition-transform duration-300 z-40
             ${isOpen ? "translate-x-0" : "-translate-x-full"}
             lg:hidden
@@ -468,7 +468,7 @@ export function Sidebar({
       <aside
         style={{ overflowY: "auto", overflowX: "clip" }}
         className={`
-          hidden lg:flex flex-col bg-[var(--color-background-2)] border-r border-[var(--color-primary-navy)]/15 h-full relative transition-all duration-300 flex-shrink-0
+          hidden lg:flex flex-col bg-[var(--color-bg-secondary)] backdrop-blur-xl backdrop-saturate-150 border-r border-[var(--color-border)] shadow-sm h-full relative transition-all duration-300 flex-shrink-0
           ${isCollapsed ? "w-20" : "w-[var(--sidebar-width)]"}
         `}
       >

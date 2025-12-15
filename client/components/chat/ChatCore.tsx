@@ -525,7 +525,7 @@ export function ChatCore({
       </div>
 
       <div
-        className={`flex-shrink-0 border-t border-[var(--color-border)]/20 bg-[var(--color-background-1)]/95 backdrop-blur-sm`}
+        className={`flex-shrink-0 border-t border-[var(--color-border)]/20 bg-[var(--color-background)]/80 backdrop-blur-xl`}
       >
         <ChatInput
           onSendMessage={sendMessage}

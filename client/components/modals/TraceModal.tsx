@@ -126,7 +126,7 @@ export function TraceModal({
       case "retrieval":
         return <Database className="h-4 w-4 text-green-500" />;
       default:
-        return <Brain className="h-4 w-4 text-[var(--color-accent)]" />;
+        return <Brain className="h-4 w-4 text-[var(--color-accent-primary)]" />;
     }
   };
 
@@ -180,7 +180,7 @@ export function TraceModal({
 
     return (
       <div key={key} className="mb-2 last:mb-0">
-        <div className="text-xs font-semibold text-[var(--color-accent)] mb-1 font-mono">
+        <div className="text-xs font-semibold text-[var(--color-accent-primary)] mb-1 font-mono">
           {key}
         </div>
         <div
@@ -271,8 +271,8 @@ export function TraceModal({
             ${
               hasChildren
                 ? isExpanded
-                  ? "border-[var(--color-accent)]/50 bg-[var(--color-background)] shadow-md"
-                  : "border-[var(--color-border)] bg-[var(--color-background-secondary)] hover:border-[var(--color-accent)]/50 hover:shadow-sm cursor-pointer"
+                  ? "border-[var(--color-accent-primary)]/50 bg-[var(--color-background)] shadow-md"
+                  : "border-[var(--color-border)] bg-[var(--color-muted)] hover:border-[var(--color-accent-primary)]/50 hover:shadow-sm cursor-pointer"
                 : "border-[var(--color-border)] bg-[var(--color-background)]"
             }
           `}
@@ -284,8 +284,8 @@ export function TraceModal({
             px-5 py-3.5 flex items-center gap-3
             ${
               hasChildren
-                ? "bg-gradient-to-r from-[var(--color-background-secondary)] to-[var(--color-background)]"
-                : "bg-[var(--color-background-secondary)]"
+                ? "bg-gradient-to-r from-[var(--color-muted)] to-[var(--color-background)]"
+                : "bg-[var(--color-muted)]"
             }
           `}
           >
@@ -293,7 +293,7 @@ export function TraceModal({
             {hasChildren && (
               <div className="flex-shrink-0">
                 {isExpanded ? (
-                  <ChevronDown className="h-5 w-5 text-[var(--color-accent)] transition-transform" />
+                  <ChevronDown className="h-5 w-5 text-[var(--color-accent-primary)] transition-transform" />
                 ) : (
                   <ChevronRight className="h-5 w-5 text-[var(--color-muted-foreground)] transition-transform" />
                 )}
@@ -340,7 +340,7 @@ export function TraceModal({
 
         {/* Children - Rendered below parent */}
         {isExpanded && hasChildren && (
-          <div className="mt-3 pl-4 border-l-2 border-[var(--color-accent)]/30">
+          <div className="mt-3 pl-4 border-l-2 border-[var(--color-accent-primary)]/30">
             {span.children!.map((child, index) =>
               renderSpan(child, `${spanPath}-${index}`, depth + 1),
             )}
@@ -365,11 +365,11 @@ export function TraceModal({
         <div className="bg-[var(--color-background)] rounded-2xl shadow-xl border border-[var(--color-border)] h-full flex flex-col">
           {/* Header */}
           <div className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-accent)]/10 via-[var(--color-accent)]/5 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-accent-primary)]/10 via-[var(--color-accent-primary)]/5 to-transparent"></div>
             <div className="relative flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center">
-                  <Code className="h-5 w-5 text-[var(--color-accent)]" />
+                <div className="h-10 w-10 rounded-lg bg-[var(--color-accent-primary)]/10 flex items-center justify-center">
+                  <Code className="h-5 w-5 text-[var(--color-accent-primary)]" />
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-[var(--color-foreground)]">
@@ -392,7 +392,7 @@ export function TraceModal({
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[var(--color-background)] to-[var(--color-background-secondary)]">
+          <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-[var(--color-background)] to-[var(--color-muted)]">
             {masFlow ? (
               /* MAS Flow Visualization */
               <div className="max-w-5xl mx-auto space-y-6">
@@ -417,7 +417,7 @@ export function TraceModal({
                   <div key={idx} className="space-y-4">
                     {/* Handoff Arrow */}
                     <div className="flex items-center gap-3 ml-8">
-                      <ArrowRight className="h-5 w-5 text-[var(--color-accent)]" />
+                      <ArrowRight className="h-5 w-5 text-[var(--color-accent-primary)]" />
                       <div className="text-sm font-medium text-[var(--color-muted-foreground)]">
                         Handoff #{idx + 1}
                       </div>
@@ -482,7 +482,7 @@ export function TraceModal({
 
                     {/* Return Arrow */}
                     <div className="flex items-center gap-3 ml-8">
-                      <ArrowRight className="h-5 w-5 text-[var(--color-accent)] rotate-180" />
+                      <ArrowRight className="h-5 w-5 text-[var(--color-accent-primary)] rotate-180" />
                       <div className="text-sm font-medium text-[var(--color-muted-foreground)]">
                         Return to Supervisor
                       </div>

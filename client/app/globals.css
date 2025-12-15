@@ -17,12 +17,33 @@
  * COLOR VARIABLES are NOT defined here - see ThemeContext + lib/themes.ts
  */
 
-/* Minimal Tailwind-compatible variables for @apply directives */
+/* Tailwind-compatible variables for @apply directives and component variants */
 @theme {
+  /* Base colors */
   --color-border: #333333;
   --color-ring: #4c809a;
   --color-background: #141414;
   --color-foreground: #e5e5e5;
+
+  /* Primary button (accent color with white text) */
+  --color-primary: var(--color-accent-primary);
+  --color-primary-foreground: #ffffff;
+
+  /* Secondary button (subtle background with visible text) */
+  --color-secondary: var(--color-bg-secondary);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-secondary-border: var(--color-border);
+
+  /* Accent (for hover states) */
+  --color-accent: var(--color-bg-secondary);
+  --color-accent-foreground: var(--color-text-primary);
+
+  /* Destructive (error/danger) */
+  --color-destructive: var(--color-error);
+
+  /* Muted (for disabled/inactive states) */
+  --color-muted: var(--color-bg-secondary);
+  --color-muted-foreground: var(--color-text-muted);
 }
 
 @layer base {

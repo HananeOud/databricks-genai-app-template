@@ -100,16 +100,16 @@ export function Message({ message, onFeedback, onViewTrace, compact = false }: M
       >
         <div
           className={`
-            rounded-2xl px-4 py-3 transition-all duration-300
+            rounded-2xl px-4 py-3 transition-all duration-300 backdrop-blur-sm
             ${
               isUser
-                ? "bg-[var(--color-chat-user-bg)] shadow-lg hover:shadow-xl"
-                : "bg-[var(--color-chat-assistant-bg)] shadow-sm hover:shadow-md"
+                ? "bg-[var(--color-accent-primary)] text-white shadow-lg hover:shadow-xl"
+                : "bg-[var(--color-background)]/80 border border-[var(--color-border)]/30 shadow-sm hover:shadow-md"
             }
           `}
         >
           {isUser ? (
-            <p className="whitespace-pre-wrap break-words text-sm text-[var(--color-chat-text)]">
+            <p className="whitespace-pre-wrap break-words text-sm text-white">
               {message.content}
             </p>
           ) : (
@@ -325,7 +325,7 @@ export function Message({ message, onFeedback, onViewTrace, compact = false }: M
             {message.traceSummary.tools_called?.length > 0 && (
               <button
                 onClick={() => onViewTrace(message.id)}
-                className="flex items-center gap-1 px-2 py-1 rounded-md bg-[var(--color-muted)] text-[var(--color-text-muted)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-2 py-1 rounded-md bg-[var(--color-muted)] text-[var(--color-text-muted)] hover:bg-[var(--color-accent-primary)]/10 hover:text-[var(--color-accent-primary)] transition-colors cursor-pointer"
                 title={`Click to view details: ${message.traceSummary.tools_called.map((t) => t.name).join(", ")}`}
               >
                 <Wrench className="h-3 w-3" />

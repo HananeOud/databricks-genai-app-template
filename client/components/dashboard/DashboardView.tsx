@@ -73,29 +73,29 @@ export function DashboardView() {
         </h1>
 
         {/* Instructions */}
-        <div className="space-y-4 text-[var(--color-text-muted)]">
-          <p className="text-lg">To configure your dashboard:</p>
-          <ol className="list-decimal list-inside space-y-2 text-base ml-4">
+        <div className="p-6 rounded-2xl bg-[var(--color-bg-secondary)] backdrop-blur-xl border border-[var(--color-border)] shadow-lg space-y-4">
+          <p className="text-lg font-medium text-[var(--color-text-primary)]">To configure your dashboard:</p>
+          <ol className="list-decimal list-inside space-y-3 text-base text-[var(--color-text-muted)]">
             <li>
               Open{" "}
-              <code className="px-2 py-1 bg-[var(--color-muted)]/30 rounded text-sm font-mono text-[var(--color-accent-primary)]">
+              <code className="px-2.5 py-1 bg-[var(--color-accent-primary)]/10 backdrop-blur-sm rounded-lg text-sm font-mono text-[var(--color-accent-primary)] border border-[var(--color-accent-primary)]/20">
                 config/app.json
               </code>
             </li>
             <li>
               Set the{" "}
-              <code className="px-2 py-1 bg-[var(--color-muted)]/30 rounded text-sm font-mono text-[var(--color-accent-primary)]">
+              <code className="px-2.5 py-1 bg-[var(--color-accent-primary)]/10 backdrop-blur-sm rounded-lg text-sm font-mono text-[var(--color-accent-primary)] border border-[var(--color-accent-primary)]/20">
                 dashboard.iframeUrl
               </code>{" "}
               to your Databricks dashboard embed URL
             </li>
             <li>
               Customize the{" "}
-              <code className="px-2 py-1 bg-[var(--color-muted)]/30 rounded text-sm font-mono text-[var(--color-accent-primary)]">
+              <code className="px-2.5 py-1 bg-[var(--color-accent-primary)]/10 backdrop-blur-sm rounded-lg text-sm font-mono text-[var(--color-accent-primary)] border border-[var(--color-accent-primary)]/20">
                 dashboard.title
               </code>{" "}
               and{" "}
-              <code className="px-2 py-1 bg-[var(--color-muted)]/30 rounded text-sm font-mono text-[var(--color-accent-primary)]">
+              <code className="px-2.5 py-1 bg-[var(--color-accent-primary)]/10 backdrop-blur-sm rounded-lg text-sm font-mono text-[var(--color-accent-primary)] border border-[var(--color-accent-primary)]/20">
                 dashboard.subtitle
               </code>{" "}
               as needed
