@@ -16,7 +16,7 @@ Complete guide to setting up, configuring, and deploying the Databricks GenAI Ap
 ### Required Software
 
 - **Python 3.11+** with [uv](https://github.com/astral-sh/uv) package manager
-- **Node.js 18+** with npm
+- **[Bun](https://bun.sh/)** for frontend package management
 - **Git** for version control
 
 ### Databricks Requirements
@@ -46,8 +46,8 @@ Complete guide to setting up, configuring, and deploying the Databricks GenAI Ap
 # Install uv (Python package manager)
 brew install uv
 
-# Node.js and npm (if not already installed)
-brew install node
+# Install bun
+brew install oven-sh/bun/bun
 ```
 
 **Linux:**
@@ -55,9 +55,8 @@ brew install node
 # Install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install Node.js (Ubuntu/Debian)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+# Install bun
+curl -fsSL https://bun.sh/install | bash
 ```
 
 **Windows:**
@@ -65,7 +64,8 @@ sudo apt-get install -y nodejs
 # Install uv
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# Install Node.js from https://nodejs.org/
+# Install bun
+powershell -c "irm bun.sh/install.ps1|iex"
 ```
 
 ### 2. Clone Repository
@@ -93,7 +93,7 @@ cd databricks-genai-app-template
    - Runs `uv sync` to create `.venv/` and install backend dependencies
 
 3. **Installs frontend dependencies:**
-   - Runs `npm install` in the `client/` directory
+   - Runs `bun install` in the `client/` directory
 
 **Output:**
 ```
@@ -130,74 +130,56 @@ WORKSPACE_SOURCE_PATH=/Workspace/Users/your.email@company.com/app-template
 
 See `.env.template` for complete reference.
 
-### Agent Configuration (config/agents.json)
+### Application Configuration (config/app.json)
 
-Define your agents and their endpoints:
+This unified config file contains agents, branding, and dashboard settings:
 
 ```json
 {
   "agents": [
     {
-      "id": "databricks-agent-01",
-      "name": "my-agent",
-      "deployment_type": "databricks-endpoint",
       "endpoint_name": "my-agent-endpoint",
       "display_name": "My Agent",
       "display_description": "Agent description shown in UI",
-      "chat_title": "Chat Title",
-      "chat_subtitle": "Subtitle shown in chat interface",
-      "llm": "databricks-meta-llama-3-1-70b-instruct",
       "tools": [
         {
+          "name": "tool_function_name",
           "display_name": "Tool Name",
-          "type": "Genie Room",
-          "display_description": "What this tool does",
-          "url": "https://your-workspace/genie/rooms/..."
+          "description": "What this tool does"
         }
       ],
-      "mlflow_experiment_id": "1234567890",
-      "mlflow_experiment_url": "https://your-workspace/ml/experiments/1234567890",
-      "mlflow_traces_url": "https://your-workspace/ml/experiments/1234567890/traces"
+      "mlflow_experiment_id": "1234567890"
     }
-  ]
-}
-```
-
-**Key fields:**
-- `deployment_type`: Currently only `databricks-endpoint` is implemented (future approaches still TODO)
-- `endpoint_name`: Name of your Databricks Model Serving endpoint
-- `mlflow_experiment_id`: MLflow experiment ID for tracing (configured in agents.json, NOT .env.local)
-- `tools`: Optional array of tools displayed in UI. Clickable to redirect to tool URL (e.g., Genie, Vector Index, etc.)
-
-### App Branding (config/app.json)
-
-Configure application branding and dashboard settings:
-
-```json
-{
+  ],
   "branding": {
-    "tabTitle": "Phoenix",
-    "appName": "Phoenix",
-    "companyName": "Phoenix",
-    "description": "Databricks GenAI App Template",
-    "logoPath": "/logos/u_logo.svg"
+    "tabTitle": "My App",
+    "appName": "My App",
+    "companyName": "My Company",
+    "description": "AI-powered assistant",
+    "logoPath": "/logos/logo.svg"
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Dashboard",
+    "subtitle": "Analytics and insights",
     "iframeUrl": "",
     "showPadding": true
   }
 }
 ```
 
-**Key fields:**
-- `branding.tabTitle`: Browser tab title
-- `branding.appName`: Application name displayed in UI
-- `branding.companyName`: Company name
-- `branding.logoPath`: Path to logo file in `client/public/`
-- `dashboard.iframeUrl`: Optional URL to embed external dashboard (e.g., AI/BI Dashboard)
-- `dashboard.showPadding`: Whether to add padding around iframe
+**Agent fields:**
+- `endpoint_name`: Name of your Databricks Model Serving endpoint
+- `mlflow_experiment_id`: MLflow experiment ID for tracing (configured here, NOT .env.local)
+- `tools`: Optional array of tools displayed in UI
+
+**Branding fields:**
+- `tabTitle`: Browser tab title
+- `appName`: Application name displayed in UI
+- `logoPath`: Path to logo file in `client/public/`
+
+**Dashboard fields:**
+- `iframeUrl`: Optional URL to embed external dashboard (e.g., AI/BI Dashboard)
+- `showPadding`: Whether to add padding around iframe
 
 ### About Page (config/about.json)
 
@@ -223,7 +205,7 @@ To customize: Edit the JSON to replace titles, content, highlights, and image pa
 1. Loads environment from `.env.local`
 2. Activates Python virtual environment
 3. Starts **FastAPI backend** on http://localhost:8000 (uvicorn with auto-reload)
-4. Starts **Next.js frontend** on http://localhost:3000 (with hot reload)
+4. Starts **Vite frontend** on http://localhost:3000 (with hot reload)
 
 **Access the application:**
 - Frontend: http://localhost:3000
@@ -241,7 +223,7 @@ Press `Ctrl+C` in the terminal running the script.
 
 **Frontend changes (React/TypeScript):**
 - Edit files in `client/`
-- Next.js hot-reloads instantly
+- Vite hot-reloads instantly
 - Changes appear immediately in browser
 
 **Configuration changes:**
@@ -320,7 +302,6 @@ Controls which files are synced:
 ```
 # Exclude from sync
 client/node_modules/
-client/.next/
 __pycache__/
 *.pyc
 .env*
@@ -339,8 +320,8 @@ __pycache__/
 
 1. **Generates requirements.txt** from pyproject.toml
 2. **Builds frontend:**
-   - Runs `npm install`
-   - Runs `npm run build`
+   - Runs `bun install`
+   - Runs `bun run build`
    - Creates `client/out/` with static files
 3. **Syncs to Databricks:**
    - Uses `.databricksignore` for filtering
@@ -421,7 +402,7 @@ Expected response:
 **Local development:**
 - Terminal output shows all logs
 - Backend: uvicorn logs
-- Frontend: Next.js console logs
+- Frontend: Vite console logs
 
 
 ### Getting Help

@@ -12,7 +12,7 @@ uv run ruff check .
 # Check TypeScript in client directory
 echo "Checking TypeScript files..."
 cd client
-npx tsc --noEmit --project .
+bunx tsc --noEmit --project .
 cd ..
 
 echo "✅ All checks passed!"

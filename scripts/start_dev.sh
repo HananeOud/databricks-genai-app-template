@@ -8,7 +8,7 @@ echo "🚀 Starting Development Servers"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Backend (FastAPI):  http://localhost:$BACKEND_PORT"
-echo "Frontend (Next.js): http://localhost:$FRONTEND_PORT"
+echo "Frontend (Vite):    http://localhost:$FRONTEND_PORT"
 echo ""
 echo "Press Ctrl+C to stop both servers"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -62,9 +62,9 @@ BACKEND_PID=$!
 # Wait a bit for backend to start
 sleep 3
 
-# Start Next.js frontend in background
-echo "🎨 Starting Next.js frontend on port $FRONTEND_PORT..."
-cd client && npm run dev -- -p $FRONTEND_PORT &
+# Start Vite frontend in background
+echo "🎨 Starting Vite frontend on port $FRONTEND_PORT..."
+cd client && bun run dev &
 FRONTEND_PID=$!
 
 # Function to cleanup on exit

@@ -87,14 +87,22 @@ uv sync
 echo "✅ Python dependencies installed (.venv/ created)"
 echo ""
 
-# Install frontend dependencies with npm
+# Install frontend dependencies with bun
 echo "📱 Installing frontend dependencies..."
-if ! command -v npm &> /dev/null; then
-    echo "❌ npm not found - install Node.js first"
-    exit 1
+if ! command -v bun &> /dev/null; then
+    echo "❌ bun not found"
+    read -p "Install bun now? (Y/n): " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        curl -fsSL https://bun.sh/install | bash
+        export PATH="$HOME/.bun/bin:$PATH"
+    else
+        echo "⚠️  Install bun manually: curl -fsSL https://bun.sh/install | bash"
+        exit 1
+    fi
 fi
 
-cd client && npm install && cd ..
+cd client && bun install && cd ..
 echo "✅ Frontend dependencies installed"
 
 echo ""

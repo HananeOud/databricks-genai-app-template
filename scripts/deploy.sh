@@ -58,10 +58,10 @@ uv run python scripts/generate_server_requirements.py
 
 # Build frontend locally before deployment
 echo ""
-echo "⚛️  Building Next.js frontend..."
+echo "⚛️  Building Vite frontend..."
 cd client
-npm install
-npm run build
+bun install
+bun run build
 cd ..
 echo "✅ Frontend build complete"
 

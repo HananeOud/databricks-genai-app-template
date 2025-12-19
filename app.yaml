@@ -4,5 +4,3 @@ command: [
 env:
   - name: ENV
     value: production
-  - name: DATABRICKS_HOST
-    value: "https://adb-984752964297111.11.azuredatabricks.net"

@@ -31,12 +31,17 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env.local if it exists (local development)
-# In production (Databricks Apps), system environment variables are used
-if load_dotenv(dotenv_path='.env.local'):
-  logger.info('✅ Loaded configuration from .env.local')
+# Determine environment:
+# 1. If .env.local exists → local development (load it and default to development)
+# 2. If ENV is explicitly set → use that value
+# 3. Otherwise → production (Databricks Apps uses app.yaml env vars)
+env_local_loaded = load_dotenv(dotenv_path='.env.local')
+env = os.getenv('ENV', 'development' if env_local_loaded else 'production')
+
+if env_local_loaded:
+  logger.info(f'✅ Loaded .env.local (ENV={env})')
 else:
-  logger.info('ℹ️  Using system environment variables')
+  logger.info(f'ℹ️  Using system environment variables (ENV={env})')
 
 
 @asynccontextmanager
@@ -61,10 +66,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Configure CORS based on environment
-# Development: Allow localhost:3000 (Next.js dev server)
+# Development: Allow localhost:3000 (Vite dev server)
 # Production: Empty list (same-origin only, most secure)
 # In production, FastAPI serves both frontend and API from same domain
-env = os.getenv('ENV', 'production')
 allowed_origins = ['http://localhost:3000'] if env == 'development' else []
 
 logger.info(f'CORS allowed origins: {allowed_origins}')
@@ -85,16 +89,16 @@ app.include_router(config.router, prefix=API_PREFIX, tags=['configuration'])
 app.include_router(agent.router, prefix=API_PREFIX, tags=['agents'])
 app.include_router(chat.router, prefix=API_PREFIX, tags=['chat'])
 
-# Production: Serve Next.js static export
-# Next.js builds to 'out' directory when using static export (output: 'export')
-# In development, access Next.js directly at localhost:3000
-# Next.js handles routing and proxies /api/* to this FastAPI backend
+# Production: Serve Vite static build
+# Vite builds to 'out' directory (configured in vite.config.ts)
+# In development, access Vite directly at localhost:3000
+# Vite dev server proxies /api/* to this FastAPI backend
 build_path = Path('.') / 'client/out'
 if build_path.exists():
-  logger.info(f'Serving Next.js static files from {build_path}')
+  logger.info(f'Serving static files from {build_path}')
   app.mount('/', StaticFiles(directory=str(build_path), html=True), name='static')
 else:
   logger.warning(
-    f'Next.js build directory {build_path} not found. '
-    'In development, run Next.js separately: cd client && npm run dev'
+    f'Build directory {build_path} not found. '
+    'In development, run Vite separately: cd client && bun run dev'
   )

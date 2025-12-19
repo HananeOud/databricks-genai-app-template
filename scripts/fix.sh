@@ -13,11 +13,8 @@ uv run ruff check --fix .
 # Format TypeScript/JavaScript files with prettier
 echo "Formatting TypeScript/JavaScript files..."
 cd client
-npm run format 2>/dev/null || {
-    echo "No npm format script found, using prettier directly..."
-    npx prettier --write "{app,components,contexts,hooks,lib,styles}/**/*.{ts,tsx,js,jsx,json,css}" 2>/dev/null || {
-        echo "Prettier not available, skipping TypeScript formatting"
-    }
+bunx prettier --write "src/**/*.{ts,tsx,js,jsx,json,css}" 2>/dev/null || {
+    echo "Prettier not available, skipping TypeScript formatting"
 }
 cd ..
 

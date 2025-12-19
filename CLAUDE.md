@@ -8,7 +8,7 @@ A template for building production-ready AI agent applications with Databricks. 
 - **Handler Pattern**: Pluggable deployment types (databricks-endpoint current, local-agent/openai planned)
 - **Strategy Pattern**: Authentication strategies (HttpTokenAuth, WorkspaceClientAuth)
 - **MLflow Integration**: Tracing and feedback collection
-- **Next.js + FastAPI**: Static frontend export served by FastAPI backend
+- **Vite/React + FastAPI**: Static frontend export served by FastAPI backend
 - **In-memory storage**: Chat history (10 chat limit)
 
 ## Package Management
@@ -19,9 +19,9 @@ A template for building production-ready AI agent applications with Databricks. 
 - Virtual environment in `.venv/`
 
 **Frontend:**
-- Use `npm` for package management (NOT bun)
-- Commands: `npm install`, `npm run dev`, `npm run build`
-- Uses shadcn/ui components with TypeScript
+- Use `bun` for package management
+- Commands: `bun install`, `bun run dev`, `bun run build`
+- Uses Vite with React Router and shadcn/ui components
 - Path alias: `@/` for imports (e.g., `import { Button } from "@/components/ui/button"`)
 
 ## Quick Start
@@ -56,27 +56,19 @@ WORKSPACE_SOURCE_PATH=/Workspace/Users/...  # Optional, for deployment
 LAKEBASE_PG_URL=postgresql://...  # Optional, enables PostgreSQL chat storage
 ```
 
-`config/agents.json` (agent definitions):
+`config/app.json` (unified config - agents, branding, dashboard):
 ```json
 {
   "agents": [{
-    "id": "databricks-agent-01",
-    "name": "my-agent",
-    "deployment_type": "databricks-endpoint",
     "endpoint_name": "my-endpoint",
-    "mlflow_experiment_id": "1234567890",  # ← Goes HERE, not .env.local
+    "display_name": "My Agent",
+    "mlflow_experiment_id": "1234567890",
     "tools": [...]
-  }]
-}
-```
-
-`config/app.json` (UI branding):
-```json
-{
+  }],
   "branding": {
-    "tabTitle": "Phoenix",
-    "appName": "Phoenix",
-    "logoPath": "/logos/u_logo.svg"
+    "tabTitle": "My App",
+    "appName": "My App",
+    "logoPath": "/logos/logo.svg"
   },
   "dashboard": {
     "iframeUrl": "",
@@ -116,13 +108,19 @@ databricks-genai-app-template/
 │   │   └── workspace_client.py
 │   ├── app.py                # FastAPI app entry
 │   └── chat_storage.py       # Storage factory (backwards compat)
-├── client/                    # Next.js frontend
-│   ├── app/                  # Pages
-│   ├── components/
-│   │   ├── chat/ChatView.tsx  # Main chat + trace collection
-│   │   └── modals/TraceModal.tsx  # Trace display
-│   ├── lib/types.ts          # TypeScript interfaces
-│   └── contexts/             # React contexts
+├── client/                    # Vite/React frontend
+│   ├── src/
+│   │   ├── App.tsx           # Routes and providers
+│   │   ├── main.tsx          # Entry point
+│   │   ├── pages/            # Page components
+│   │   ├── components/       # React components
+│   │   │   ├── chat/         # ChatCore, Message, ChatInput
+│   │   │   ├── modals/       # TraceModal, FeedbackModal
+│   │   │   └── layout/       # MainLayout, Sidebar, TopBar
+│   │   ├── contexts/         # React state (user, agents, theme)
+│   │   └── lib/              # Types and utilities
+│   ├── index.html            # Vite entry point
+│   └── vite.config.ts        # Vite configuration
 ├── config/                    # JSON configuration
 ├── alembic/                   # Database migrations
 ├── scripts/                   # Build/deploy scripts
@@ -234,7 +232,7 @@ async for line in response.aiter_lines():
 1. **Setup:** Run `./scripts/setup.sh` once
 2. **Start:** Run `./scripts/start_dev.sh`
    - Backend: http://localhost:8000 (uvicorn with auto-reload)
-   - Frontend: http://localhost:3000 (Next.js dev server)
+   - Frontend: http://localhost:3000 (Vite dev server)
 3. **Edit code:** Changes auto-reload (Python) or hot-reload (React)
 4. **Format:** Run `./scripts/fix.sh` before committing
 5. **Test API:** Use curl to test endpoints:
@@ -261,7 +259,7 @@ async for line in response.aiter_lines():
 
 **What it does:**
 1. Generates `requirements.txt` from pyproject.toml
-2. Builds frontend: `npm install && npm run build` → creates `client/out/`
+2. Builds frontend: `bun install && bun run build` → creates `client/out/`
 3. Syncs to workspace using `.databricksignore` filters
 4. Deploys app using `app.yaml` configuration
 5. Verifies with `databricks apps list`
@@ -300,10 +298,10 @@ env:
 
 ### Configuration
 
-- ❌ **MLFLOW_EXPERIMENT_ID in .env.local** - WRONG, goes in config/agents.json
-- ✅ **mlflow_experiment_id in agents.json** - CORRECT
-- Frontend on port 3000, backend on port 8000 (NOT proxied)
-- Use npm, NOT bun
+- ❌ **MLFLOW_EXPERIMENT_ID in .env.local** - WRONG, goes in config/app.json
+- ✅ **mlflow_experiment_id in app.json agents array** - CORRECT
+- Frontend on port 3000, backend on port 8000 (Vite proxies /api to backend)
+- Use bun for frontend package management
 
 ### Traces
 
@@ -334,9 +332,9 @@ env:
 - `server/app.py:55-71` - Static file serving for frontend
 
 ### Frontend Chat
-- `client/components/chat/ChatView.tsx:334-760` - Message streaming and trace collection
-- `client/components/modals/TraceModal.tsx` - Trace display UI
-- `client/lib/types.ts:39-71` - TraceSummary interface
+- `client/src/components/chat/ChatCore.tsx` - Message streaming and trace collection
+- `client/src/components/modals/TraceModal.tsx` - Trace display UI
+- `client/src/lib/types.ts` - TraceSummary interface
 
 ### Handlers & Auth
 - `server/services/agents/handlers/databricks_endpoint.py:40-112` - SSE streaming
@@ -367,7 +365,7 @@ env:
 - Never commit `.env.local` to git
 
 ### Agent Not Found
-- Verify `endpoint_name` in `config/agents.json` matches actual endpoint
+- Verify `endpoint_name` in `config/app.json` agents array matches actual endpoint
 - Check endpoint is in READY state in Databricks workspace
 - Confirm endpoint is accessible with token/credentials
 
@@ -378,7 +376,7 @@ env:
 - Pin conflicting packages to exact versions in pyproject.toml
 
 ### Build Errors
-- Frontend: `cd client && npm run build`
+- Frontend: `cd client && bun run build`
 - Backend: `uv sync` to update dependencies
 - Run `./scripts/fix.sh` to fix formatting issues
 
