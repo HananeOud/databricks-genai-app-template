@@ -154,13 +154,13 @@ export const PREDEFINED_THEMES: PredefinedTheme[] = [
         '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     },
     animatedBackground: {
-      particleCount: 30,
+      particleCount: 25,
       connectionDistance: 80,
-      particleOpacity: 0.12,
-      lineOpacity: 0.08,
-      particleSize: 2,
-      lineWidth: 1,
-      animationSpeed: 0.4,
+      particleOpacity: 0.1,
+      lineOpacity: 0.5,
+      particleSize: 1.5,
+      lineWidth: 1.2,
+      animationSpeed: 1.1,
     },
   },
   {
@@ -204,13 +204,13 @@ export const PREDEFINED_THEMES: PredefinedTheme[] = [
         '"Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     },
     animatedBackground: {
-      particleCount: 70, // Higher density for energetic feel
-      connectionDistance: 60, // Closer connections for energy
-      particleOpacity: 0.6, // Good visibility
-      lineOpacity: 0.9, // Balanced connections
-      particleSize: 3.5, // Medium-large presence
-      lineWidth: 2.7, // Visible lines
-      animationSpeed: 1.0, // Energetic, music rhythm
+      particleCount: 25,
+      connectionDistance: 80,
+      particleOpacity: 0.1,
+      lineOpacity: 0.5,
+      particleSize: 1.5,
+      lineWidth: 1.2,
+      animationSpeed: 1.1,
     },
   },
 ];

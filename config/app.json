@@ -3,9 +3,17 @@
   "enable_tracker": true,
   "demo_catalog_id": "",
   "agents": [
+    {
+      "mas_id": "45eb36c4-0e8a-4094-aa86-67df6e0b455d",
+      "question_examples": [
+        "What can you help me with?",
+        "How do I get started?",
+        "Show me an example query"
+      ]
+    }
   ],
   "branding": {
-    "name": "Databricks",
+    "name": "",
     "logo": "/logos/u_logo.svg"
   },
   "home": {
@@ -13,8 +21,8 @@
     "description": "Build production-ready AI applications with Databricks. This template provides a complete foundation for creating intelligent agents, chat interfaces, and data-driven dashboards."
   },
   "dashboard": {
-    "title": "Dashboard",
-    "subtitle": "Dashboard",
+    "title": "This is a very cool AI/BI Dashboard",
+    "subtitle": "And this is why it is a very cool one",
     "dashboardId": "",
     "showPadding": true
   }
