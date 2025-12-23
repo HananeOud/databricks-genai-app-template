@@ -498,6 +498,40 @@ class AgentBricksService:
         'deployment_type': 'databricks-endpoint',
       }
 
+  # ---------- MAS ID to Endpoint Name ----------
+
+  async def async_get_endpoint_name_from_mas_id(self, mas_id: str) -> str:
+    """Get the endpoint name for a MAS tile ID by querying the API.
+
+    Args:
+      mas_id: The MAS tile UUID (e.g., "45eb36c4-0e8a-4094-aa86-67df6e0b455d")
+
+    Returns:
+      The serving endpoint name (e.g., "mas-45eb36c4-endpoint")
+
+    Raises:
+      ValueError: If mas_id is not found or has no serving_endpoint_name
+    """
+    headers = self._get_headers()
+
+    async with httpx.AsyncClient(headers=headers) as client:
+      mas = await self._async_mas_get(client, mas_id)
+      if not mas:
+        raise ValueError(f"MAS with tile_id '{mas_id}' not found")
+
+      tile = mas.get('tile', {})
+      endpoint_name = tile.get('serving_endpoint_name')
+
+      if not endpoint_name:
+        raise ValueError(f"MAS '{mas_id}' has no serving_endpoint_name configured")
+
+      logger.info(f"Resolved mas_id '{mas_id}' to endpoint '{endpoint_name}'")
+      return endpoint_name
+
+  def get_endpoint_name_from_mas_id(self, mas_id: str) -> str:
+    """Sync wrapper for async_get_endpoint_name_from_mas_id."""
+    return asyncio.run(self.async_get_endpoint_name_from_mas_id(mas_id))
+
   # ---------- Main async method (with cache) ----------
 
   async def async_get_agent_details_from_endpoint(self, endpoint_name: str) -> Dict[str, Any]:

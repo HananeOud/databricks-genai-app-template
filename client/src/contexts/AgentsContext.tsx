@@ -9,6 +9,7 @@ import { Agent } from "@/lib/types";
 
 interface AgentsContextType {
   agents: Agent[];
+  agentErrors: Agent[]; // Agents with status "ERROR"
   loading: boolean;
   error: Error | null;
   getAgentById: (id: string) => Agent | undefined;
@@ -64,10 +65,16 @@ export function AgentsProvider({ children }: AgentsProviderProps) {
     return agents.find((agent) => agent.id === id);
   };
 
+  // Filter agents that have errors
+  const agentErrors = agents.filter(
+    (agent) => agent.status === "ERROR" || agent.error
+  );
+
   return (
     <AgentsContext.Provider
       value={{
         agents,
+        agentErrors,
         loading,
         error,
         getAgentById,

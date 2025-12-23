@@ -94,30 +94,26 @@ LAKEBASE_PROJECT_ID=your-project-id  # For UI link to Lakebase
 {
   "agents": [
     {
+      "mas_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "question_examples": ["What can you help me with?"]
+    },
+    {
       "endpoint_name": "your-agent-endpoint",
       "display_name": "My Agent",
-      "display_description": "Agent description shown in UI",
-      "mlflow_experiment_id": "123456789",
-      "tools": [
-        {
-          "name": "tool_function_name",
-          "display_name": "Tool Name",
-          "description": "What this tool does"
-        }
-      ]
+      "question_examples": ["Example question for this agent"],
+      "mlflow_experiment_id": "123456789"
     }
   ],
   "branding": {
-    "appName": "My App",
-    "tabTitle": "My App",
-    "logoPath": "/logos/logo.svg"
+    "name": "My Company",
+    "logo": "/logos/logo.svg"
   }
 }
 ```
 
 ### Branding & Theming
 
-- **Logo**: Place your logo in `client/public/logos/` and update `logoPath` in config
+- **Logo**: Place your logo in `client/public/logos/` and update `branding.logo` in config
 - **Colors/Fonts**: Click "Edit" button in top-right of the app to customize in real-time
 - **Code changes**: Modify `client/tailwind.config.ts` for deep customization
 

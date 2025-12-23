@@ -42,6 +42,7 @@ interface NavigationContextType {
   setIsStreaming: (streaming: boolean) => void;
   // Chats
   chats: Chat[];
+  chatsLoading: boolean;
   setChats: (chats: Chat[]) => void;
   fetchChats: (signal?: AbortSignal) => Promise<void>;
   // Edit mode
@@ -98,6 +99,7 @@ export function NavigationProvider({
     undefined
   );
   const [chats, setChats] = useState<Chat[]>([]);
+  const [chatsLoading, setChatsLoading] = useState(true);
   const [isStreaming, setIsStreaming] = useState(false);
 
   // Sidebar state
@@ -120,6 +122,7 @@ export function NavigationProvider({
 
   // Fetch chats from API
   const fetchChats = useCallback(async (signal?: AbortSignal) => {
+    setChatsLoading(true);
     try {
       const response = await fetch('/api/chats', { signal });
       const data: ChatData[] = await response.json();
@@ -143,6 +146,8 @@ export function NavigationProvider({
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
       console.error('Failed to fetch chat history:', error);
+    } finally {
+      setChatsLoading(false);
     }
   }, []);
 
@@ -227,6 +232,7 @@ export function NavigationProvider({
         isStreaming,
         setIsStreaming,
         chats,
+        chatsLoading,
         setChats,
         fetchChats,
         isEditMode,

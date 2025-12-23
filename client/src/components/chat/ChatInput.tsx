@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, KeyboardEvent, useEffect } from "react";
-import { ArrowUp, ChevronDown, Check } from "lucide-react";
+import { ArrowUp, ChevronDown, Check, Loader2, AlertCircle } from "lucide-react";
 import { useAgents } from "@/hooks/useAgents";
 
 interface ChatInputProps {
@@ -11,6 +11,7 @@ interface ChatInputProps {
   hasMessages?: boolean; // Whether the current chat has messages (locks agent)
   compact?: boolean; // Compact mode for widget
   showAgentSelector?: boolean; // Show agent dropdown
+  questionExamples?: string[]; // Example questions to display as chips
 }
 
 export function ChatInput({
@@ -21,10 +22,11 @@ export function ChatInput({
   hasMessages = false,
   compact = false,
   showAgentSelector = true,
+  questionExamples = [],
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { agents } = useAgents();
+  const { agents, loading: agentsLoading } = useAgents();
   const [isAgentDropdownOpen, setIsAgentDropdownOpen] = useState(false);
 
   const selectedAgent = propSelectedAgentId || "";
@@ -91,6 +93,13 @@ export function ChatInput({
   };
 
   const currentAgent = agents.find((a) => a.id === selectedAgent);
+  const currentAgentHasError = currentAgent?.status === "ERROR" || !!currentAgent?.error;
+
+  const handleExampleClick = (example: string) => {
+    if (!disabled) {
+      onSendMessage(example);
+    }
+  };
 
   return (
     <div className={compact ? "px-3 py-2 bg-transparent" : "px-6 py-4 bg-transparent"}>
@@ -118,57 +127,77 @@ export function ChatInput({
                 <div className="relative agent-dropdown-container">
                   <button
                     onClick={() =>
-                      !hasMessages && setIsAgentDropdownOpen(!isAgentDropdownOpen)
+                      !hasMessages && !agentsLoading && setIsAgentDropdownOpen(!isAgentDropdownOpen)
                     }
-                    disabled={hasMessages}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors duration-200 border ${
-                      hasMessages
+                    disabled={hasMessages || agentsLoading}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors duration-200 border max-w-[180px] ${
+                      hasMessages || agentsLoading
                         ? "bg-[var(--color-muted)] opacity-60 cursor-not-allowed border-transparent"
-                        : "bg-[var(--color-muted)] hover:bg-[var(--color-secondary)] border-transparent hover:border-[var(--color-border)]"
+                        : currentAgentHasError
+                          ? "bg-red-100 hover:bg-red-200 border-red-300 hover:border-red-400"
+                          : "bg-[var(--color-muted)] hover:bg-[var(--color-secondary)] border-transparent hover:border-[var(--color-border)]"
                     }`}
                     title={
-                      hasMessages ? "Agent locked for this chat" : "Select agent"
+                      agentsLoading ? "Loading agent..." : hasMessages ? "Agent locked for this chat" : currentAgentHasError ? currentAgent?.error : "Select agent"
                     }
                   >
-                    <span className="text-xs font-medium text-[var(--color-foreground)]">
-                      {currentAgent?.display_name || "Agent"}
+                    {agentsLoading ? (
+                      <Loader2 className="h-3 w-3 text-[var(--color-muted-foreground)] animate-spin" />
+                    ) : currentAgentHasError ? (
+                      <AlertCircle className="h-3 w-3 text-red-600 flex-shrink-0" />
+                    ) : null}
+                    <span className={`text-xs font-medium truncate ${currentAgentHasError ? "text-red-700" : "text-[var(--color-foreground)]"}`}>
+                      {agentsLoading ? "Loading..." : (currentAgent?.display_name || "Agent")}
                     </span>
-                    {!hasMessages && (
+                    {!hasMessages && !agentsLoading && (
                       <ChevronDown
-                        className={`h-3 w-3 text-[var(--color-muted-foreground)] transition-transform ${isAgentDropdownOpen ? "rotate-180" : ""}`}
+                        className={`h-3 w-3 flex-shrink-0 transition-transform ${currentAgentHasError ? "text-red-500" : "text-[var(--color-muted-foreground)]"} ${isAgentDropdownOpen ? "rotate-180" : ""}`}
                       />
                     )}
                   </button>
 
                   {/* Agent Dropdown Menu */}
                   {isAgentDropdownOpen && agents.length > 0 && (
-                    <div className={`absolute bottom-full right-0 mb-2 bg-[var(--color-background)]/95 backdrop-blur-xl rounded-xl shadow-xl border border-[var(--color-border)]/40 py-2 z-50 ${compact ? "w-[240px]" : "w-[280px]"}`}>
-                      {agents.map((agent) => (
-                        <button
-                          key={agent.id}
-                          onClick={() => {
-                            onAgentChange?.(agent.id);
-                            setIsAgentDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 hover:bg-[var(--color-accent-primary)]/10 transition-colors flex items-start justify-between gap-3 ${
-                            selectedAgent === agent.id
-                              ? "bg-[var(--color-accent-primary)]/10"
-                              : ""
-                          }`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-sm text-[var(--color-foreground)] leading-tight">
-                              {agent.display_name}
+                    <div className={`absolute bottom-full right-0 mb-2 bg-[var(--color-background)] rounded-xl shadow-xl border border-[var(--color-border)] py-2 z-50 max-h-[300px] overflow-y-auto ${compact ? "w-[260px]" : "w-[300px]"}`}>
+                      {agents.map((agent) => {
+                        const hasError = agent.status === "ERROR" || !!agent.error;
+                        return (
+                          <button
+                            key={agent.id}
+                            onClick={() => {
+                              onAgentChange?.(agent.id);
+                              setIsAgentDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-3 transition-colors flex items-start justify-between gap-3 ${
+                              hasError
+                                ? "bg-red-50 hover:bg-red-100"
+                                : selectedAgent === agent.id
+                                  ? "bg-[var(--color-accent-primary)]/10"
+                                  : "hover:bg-[var(--color-accent-primary)]/10"
+                            }`}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className={`font-semibold text-sm leading-tight truncate ${hasError ? "text-red-700" : "text-[var(--color-foreground)]"}`}>
+                                {agent.display_name}
+                              </div>
+                              {hasError ? (
+                                <div className="text-xs text-red-600 mt-1 leading-snug line-clamp-2">
+                                  {agent.error}
+                                </div>
+                              ) : agent.display_description ? (
+                                <div className="text-xs text-[var(--color-muted-foreground)] mt-1 leading-snug line-clamp-2">
+                                  {agent.display_description}
+                                </div>
+                              ) : null}
                             </div>
-                            <div className="text-xs text-[var(--color-muted-foreground)] mt-1 leading-snug">
-                              {agent.display_description}
-                            </div>
-                          </div>
-                          {selectedAgent === agent.id && (
-                            <Check className="h-4 w-4 text-[var(--color-accent-primary)] flex-shrink-0 mt-0.5" />
-                          )}
-                        </button>
-                      ))}
+                            {hasError ? (
+                              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                            ) : selectedAgent === agent.id ? (
+                              <Check className="h-4 w-4 text-[var(--color-accent-primary)] flex-shrink-0 mt-0.5" />
+                            ) : null}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -190,6 +219,31 @@ export function ChatInput({
           </div>
         </div>
       </div>
+
+      {/* Question Examples */}
+      {questionExamples.length > 0 && !compact && (
+        <div className="mt-3 flex items-center gap-x-1.5 justify-center">
+          <span className="text-sm text-[var(--color-muted-foreground)] flex-shrink-0">Try:</span>
+          {questionExamples.slice(0, 5).map((example, index) => (
+            <span key={index} className="flex items-center flex-shrink-0">
+              <span className="group relative">
+                <button
+                  onClick={() => handleExampleClick(example)}
+                  disabled={disabled}
+                  className="text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-accent-primary)] transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer hover:underline"
+                >
+                  {example.length > 35 ? `${example.slice(0, 35)}...` : example}
+                </button>
+                {/* Tooltip */}
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-sm text-[var(--color-foreground)] bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-normal w-72 text-center z-50">
+                  {example}
+                </span>
+              </span>
+              {index < Math.min(questionExamples.length, 5) - 1 && <span className="text-[var(--color-border)] mx-1.5">•</span>}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

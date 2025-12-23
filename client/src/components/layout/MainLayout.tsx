@@ -25,6 +25,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     selectedAgentId,
     setSelectedAgentId,
     chats,
+    chatsLoading,
     setChats,
     isEditMode,
     setIsEditMode,
@@ -63,6 +64,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 selectedAgentId={selectedAgentId}
                 onAgentChange={setSelectedAgentId}
                 chats={chats}
+                chatsLoading={chatsLoading}
                 onChatsChange={setChats}
               />
             </div>
@@ -78,6 +80,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               selectedAgentId={selectedAgentId}
               onAgentChange={setSelectedAgentId}
               chats={chats}
+              chatsLoading={chatsLoading}
               onChatsChange={setChats}
             />
           </>

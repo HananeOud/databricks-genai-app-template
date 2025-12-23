@@ -4,7 +4,6 @@ import {
   Plus,
   MessageSquare,
   Trash2,
-  Edit2,
   Menu,
   X,
   ChevronLeft,
@@ -12,8 +11,8 @@ import {
   Database,
   ExternalLink,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useAgents } from "@/hooks/useAgents";
 import { useUserContext } from "@/contexts/UserContext";
@@ -38,6 +37,7 @@ interface SidebarProps {
   selectedAgentId?: string;
   onAgentChange?: (agentId: string) => void;
   chats: Chat[]; // Chat list managed by parent
+  chatsLoading?: boolean; // Loading state for chats
   onChatsChange: (chats: Chat[]) => void; // Callback to update chats
 }
 
@@ -53,11 +53,10 @@ export function Sidebar({
   selectedAgentId: propSelectedAgentId,
   onAgentChange,
   chats,
+  chatsLoading = false,
   onChatsChange,
 }: SidebarProps) {
   const [hoveredChat, setHoveredChat] = useState<string | null>(null);
-  const [editingChat, setEditingChat] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState("");
   const { agents } = useAgents();
   const { workspaceUrl, lakebaseConfigured, lakebaseProjectId, lakebaseError } = useUserContext();
 
@@ -82,35 +81,6 @@ export function Sidebar({
     }
   };
 
-  const handleRenameChat = async (chatId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const chat = chats.find((c) => c.id === chatId);
-    if (chat) {
-      setEditingChat(chatId);
-      setEditTitle(chat.title);
-    }
-  };
-
-  const saveRename = async (chatId: string) => {
-    try {
-      await fetch(`/api/chats/${chatId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: editTitle }),
-      });
-
-      onChatsChange(
-        chats.map((chat) =>
-          chat.id === chatId ? { ...chat, title: editTitle } : chat,
-        ),
-      );
-      setEditingChat(null);
-    } catch (error) {
-      console.error("Failed to rename chat:", error);
-      toast.error("Failed to rename chat");
-    }
-  };
-
   const sidebarContent = (
     <>
       {/* Header */}
@@ -121,7 +91,7 @@ export function Sidebar({
           onClick={onNewChat}
           className={`flex items-center w-full hover:bg-[var(--color-accent-primary)]/[0.08] rounded-xl transition-all duration-300 group ${isCollapsed ? "p-2 justify-center" : "p-3 gap-3"}`}
         >
-          <div className="flex items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/80 text-white transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:scale-105 h-10 w-10 flex-shrink-0">
+          <div className="flex items-center justify-center rounded-xl bg-[var(--color-accent-primary)] text-white transition-all duration-300 shadow-sm group-hover:shadow-md group-hover:scale-105 h-10 w-10 flex-shrink-0">
             <Plus className="h-5 w-5" strokeWidth={2.5} />
           </div>
           {!isCollapsed && (
@@ -135,7 +105,12 @@ export function Sidebar({
       {/* Chat List */}
       {!isCollapsed && (
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3">
-          {chats.length === 0 ? (
+          {chatsLoading ? (
+            <div className="text-center py-12 text-[var(--color-primary-navy)]/50">
+              <Loader2 className="h-8 w-8 mx-auto mb-3 opacity-60 animate-spin" />
+              <p className="text-sm font-medium">Loading chats...</p>
+            </div>
+          ) : chats.length === 0 ? (
             <div className="text-center py-12 text-[var(--color-primary-navy)]/50">
               <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-40" />
               <p className="text-sm font-medium">No chat history yet</p>
@@ -155,93 +130,48 @@ export function Sidebar({
                     group relative px-2.5 py-2 rounded-lg cursor-pointer transition-all duration-200
                     ${
                       currentChatId === chat.id
-                        ? "bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-primary)]/85 text-white shadow-md"
+                        ? "bg-[var(--color-accent-primary)] text-white shadow-sm"
                         : "bg-[var(--color-background)] hover:bg-[var(--color-background)]/80 text-[var(--color-foreground)] border border-[var(--color-border)]/50 hover:border-[var(--color-border)] hover:shadow-sm"
                     }
                   `}
                 >
-                  {editingChat === chat.id ? (
-                    <input
-                      type="text"
-                      value={editTitle}
-                      onChange={(e) => setEditTitle(e.target.value)}
-                      onBlur={() => saveRename(chat.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") saveRename(chat.id);
-                        if (e.key === "Escape") setEditingChat(null);
-                      }}
-                      className="w-full bg-transparent border-b border-current outline-none text-sm"
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between gap-2">
-                        <h3
-                          className={`font-medium text-xs truncate flex-1 ${
-                            currentChatId === chat.id
-                              ? "text-white"
-                              : "text-[var(--color-text-heading)]"
-                          }`}
-                        >
-                          {chat.title}
-                        </h3>
-                        <span
-                          className={`text-[10px] flex-shrink-0 ${
-                            currentChatId === chat.id
-                              ? "text-white/60"
-                              : "text-[var(--color-text-muted)]"
-                          }`}
-                        >
-                          {formatDistanceToNow(chat.timestamp, {
-                            addSuffix: false,
-                          })}
-                        </span>
-                      </div>
-                      <p
-                        className={`text-[11px] mt-0.5 truncate ${
-                          currentChatId === chat.id
-                            ? "text-white/70"
-                            : "text-[var(--color-text-muted)]"
-                        }`}
-                      >
-                        {chat.preview}
-                      </p>
-                    </>
-                  )}
+                  <h3
+                    className={`font-medium text-xs truncate ${
+                      currentChatId === chat.id
+                        ? "text-white"
+                        : "text-[var(--color-text-heading)]"
+                    }`}
+                  >
+                    {chat.title}
+                  </h3>
+                  <p
+                    className={`text-[11px] mt-0.5 truncate ${
+                      currentChatId === chat.id
+                        ? "text-white/70"
+                        : "text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {chat.preview}
+                  </p>
 
-                  {/* Action buttons - show on hover, positioned on the right of preview line */}
-                  {(hoveredChat === chat.id || currentChatId === chat.id) &&
-                    !editingChat && (
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => handleRenameChat(chat.id, e)}
-                          className="p-1 rounded hover:bg-black/10 transition-colors"
-                          title="Rename"
-                        >
-                          <Edit2
-                            className={`h-3 w-3 ${
-                              currentChatId === chat.id
-                                ? "text-[var(--color-white)]/70 hover:text-[var(--color-white)]"
-                                : "text-[var(--color-primary-navy)]/50 hover:text-[var(--color-primary-navy)]"
-                            }`}
-                          />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteChat(chat.id, e)}
-                          className="p-1 rounded hover:bg-black/10 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2
-                            className={`h-3 w-3 ${
-                              currentChatId === chat.id
-                                ? "text-[var(--color-white)]/70 hover:text-[var(--color-white)]"
-                                : "text-[var(--color-primary-navy)]/50 hover:text-[var(--color-error)]"
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    )}
+                  {/* Delete button - show on hover */}
+                  {hoveredChat === chat.id && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => handleDeleteChat(chat.id, e)}
+                        className="p-1 rounded hover:bg-black/10 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2
+                          className={`h-3 w-3 ${
+                            currentChatId === chat.id
+                              ? "text-white/70 hover:text-white"
+                              : "text-[var(--color-primary-navy)]/50 hover:text-[var(--color-error)]"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

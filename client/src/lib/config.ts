@@ -18,14 +18,35 @@ export interface AgentConfig {
   display_name?: string;
   display_description?: string;
   tools?: AgentTool[];
+  error?: string;
+  status?: string;
+}
+
+export interface AgentsResponse {
+  agents: AgentConfig[];
+  error?: string;
+}
+
+/**
+ * Fetch agents configuration from backend API.
+ * This endpoint resolves mas_id to endpoint_name and checks agent status.
+ */
+export async function getAgentsConfig(): Promise<AgentsResponse> {
+  try {
+    const response = await fetch("/api/config/agents");
+    if (!response.ok) {
+      throw new Error(`Failed to load agents: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error loading agents config:", error);
+    return { agents: [], error: String(error) };
+  }
 }
 
 export interface AppBranding {
-  tabTitle: string;
-  appName: string;
-  companyName: string;
-  description: string;
-  logoPath: string;
+  name: string; // Displayed in TopBar next to logo
+  logo: string; // Path to logo image in TopBar
 }
 
 export interface HomeConfig {
@@ -91,11 +112,8 @@ export async function getAppConfig(): Promise<AppConfig> {
       const fallbackConfig: AppConfig = {
         agents: [],
         branding: {
-          tabTitle: "AI Assistant",
-          appName: "AI Assistant",
-          companyName: "",
-          description: "AI-powered assistant",
-          logoPath: "/logos/databricks-symbol-color.svg",
+          name: "AI Assistant",
+          logo: "/logos/databricks-symbol-color.svg",
         },
         home: {
           title: "Databricks App Template",

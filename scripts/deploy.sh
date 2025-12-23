@@ -5,6 +5,85 @@
 
 set -e
 
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🚀 Databricks App Deployment"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# ============================================================
+# Check Required Dependencies
+# ============================================================
+
+MISSING_DEPS=()
+INSTALL_COMMANDS=()
+
+# Check for uv (Python package manager)
+if ! command -v uv &> /dev/null; then
+  MISSING_DEPS+=("uv")
+  INSTALL_COMMANDS+=("curl -LsSf https://astral.sh/uv/install.sh | sh")
+fi
+
+# Check for bun (JavaScript runtime)
+if ! command -v bun &> /dev/null; then
+  MISSING_DEPS+=("bun")
+  INSTALL_COMMANDS+=("curl -fsSL https://bun.sh/install | bash")
+fi
+
+# Check for databricks CLI
+if ! command -v databricks &> /dev/null; then
+  MISSING_DEPS+=("databricks")
+  INSTALL_COMMANDS+=("curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh")
+fi
+
+# If there are missing dependencies, prompt user
+if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "📦 Missing Required Dependencies"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "The following tools are required but not installed:"
+  echo ""
+  for i in "${!MISSING_DEPS[@]}"; do
+    echo "  ❌ ${MISSING_DEPS[$i]}"
+    echo "     Install: ${INSTALL_COMMANDS[$i]}"
+    echo ""
+  done
+
+  read -p "Would you like to install them now? (y/N) " -n 1 -r
+  echo ""
+
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    for i in "${!MISSING_DEPS[@]}"; do
+      echo "📥 Installing ${MISSING_DEPS[$i]}..."
+      eval "${INSTALL_COMMANDS[$i]}"
+      if [ $? -eq 0 ]; then
+        echo "✅ ${MISSING_DEPS[$i]} installed successfully"
+      else
+        echo "❌ Failed to install ${MISSING_DEPS[$i]}"
+        exit 1
+      fi
+      echo ""
+    done
+
+    # Reload shell environment to pick up new installations
+    echo "🔄 Reloading shell environment..."
+    export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"
+    echo ""
+  else
+    echo ""
+    echo "Please install the missing dependencies and try again."
+    exit 1
+  fi
+fi
+
+echo "✅ All dependencies installed (uv, bun, databricks)"
+echo ""
+
+# ============================================================
+# Project Root Check
+# ============================================================
+
 # Ensure script is run from project root
 if [ ! -f "pyproject.toml" ] || [ ! -d "client" ]; then
   echo "❌ Error: This script must be run from the project root directory"
@@ -12,6 +91,10 @@ if [ ! -f "pyproject.toml" ] || [ ! -d "client" ]; then
   echo "Run: cd /path/to/databricks-genai-app-template && ./scripts/deploy.sh"
   exit 1
 fi
+
+# ============================================================
+# Environment Configuration
+# ============================================================
 
 # Load environment variables from .env.local if it exists.
 if [ -f .env.local ]
@@ -39,12 +122,34 @@ then
   DATABRICKS_CONFIG_PROFILE="DEFAULT"
 fi
 
+# ============================================================
+# Databricks Authentication
+# ============================================================
+
+echo "🔐 Verifying Databricks authentication..."
+
 # Authenticate with Databricks CLI using the host from environment
-if [ -n "$DATABRICKS_HOST" ]
-then
-  echo "Authenticating with Databricks at $DATABRICKS_HOST..."
-  databricks auth login --host "$DATABRICKS_HOST"
+if [ -n "$DATABRICKS_HOST" ]; then
+  databricks auth login --host "$DATABRICKS_HOST" 2>/dev/null || true
 fi
+
+# Verify authentication by testing a simple API call
+if ! databricks auth describe --profile "$DATABRICKS_CONFIG_PROFILE" &> /dev/null; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "❌ Databricks Authentication Failed"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "Unable to authenticate with Databricks."
+  echo ""
+  echo "Please ensure one of the following:"
+  echo "  1. DATABRICKS_HOST and DATABRICKS_TOKEN are set in .env.local"
+  echo "  2. Or run: databricks auth login --host <your-workspace-url>"
+  echo ""
+  exit 1
+fi
+
+echo "✅ Databricks authentication verified"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

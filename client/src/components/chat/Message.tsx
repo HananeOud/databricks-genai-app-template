@@ -10,6 +10,7 @@ import {
   Database,
   Copy,
   Check,
+  AlertCircle,
 } from "lucide-react";
 import { Message as MessageType } from "@/lib/types";
 import { ChartRenderer } from "./ChartRenderer";
@@ -90,6 +91,7 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
 
 export function Message({ message, onFeedback, onViewTrace, compact = false }: MessageProps) {
   const isUser = message.role === "user";
+  const isError = message.isError === true;
 
   return (
     <div
@@ -106,7 +108,9 @@ export function Message({ message, onFeedback, onViewTrace, compact = false }: M
             ${
               isUser
                 ? "bg-[var(--color-accent-primary)] text-white shadow-lg hover:shadow-xl"
-                : "bg-[var(--color-background)]/80 border border-[var(--color-border)]/30 shadow-sm hover:shadow-md"
+                : isError
+                  ? "bg-red-50 dark:bg-red-950/30 border border-red-300 dark:border-red-800 shadow-sm"
+                  : "bg-[var(--color-background)]/80 border border-[var(--color-border)]/30 shadow-sm hover:shadow-md"
             }
           `}
         >
@@ -114,6 +118,13 @@ export function Message({ message, onFeedback, onViewTrace, compact = false }: M
             <p className="whitespace-pre-wrap break-words text-sm text-white">
               {message.content}
             </p>
+          ) : isError ? (
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="whitespace-pre-wrap break-words text-sm text-red-700 dark:text-red-400">
+                {message.content}
+              </p>
+            </div>
           ) : (
             <div className="prose prose-sm max-w-none break-words text-sm text-[var(--color-text-primary)]">
               <ReactMarkdown
@@ -299,8 +310,8 @@ export function Message({ message, onFeedback, onViewTrace, compact = false }: M
           {formatDistanceToNow(message.timestamp, { addSuffix: true })}
         </div>
 
-        {/* Trace Summary (for assistant messages with trace data) */}
-        {!isUser && message.traceSummary && (
+        {/* Trace Summary (for assistant messages with trace data, not for errors) */}
+        {!isUser && !isError && message.traceSummary && (
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             {message.traceSummary.duration_ms > 0 && (
               <div
@@ -355,8 +366,8 @@ export function Message({ message, onFeedback, onViewTrace, compact = false }: M
           </div>
         )}
 
-        {/* Action Buttons (for assistant messages) */}
-        {!isUser && (
+        {/* Action Buttons (for assistant messages, not for errors) */}
+        {!isUser && !isError && (
           <div className="flex items-center gap-2 mt-2">
             <Button
               variant="ghost"

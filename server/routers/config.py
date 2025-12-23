@@ -2,7 +2,10 @@
 
 import asyncio
 import logging
+from typing import Optional, Tuple
 
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.errors import ResourceDoesNotExist
 from fastapi import APIRouter, Request
 
 from ..config_loader import config_loader
@@ -16,6 +19,28 @@ router = APIRouter()
 def is_mas_endpoint(endpoint_name: str) -> bool:
   """Check if an endpoint is a MAS (Multi-Agent Supervisor) endpoint."""
   return 'mas' in endpoint_name.lower()
+
+
+def validate_serving_endpoint(endpoint_name: str) -> Tuple[bool, Optional[str], Optional[str]]:
+  """Validate that a serving endpoint exists.
+
+  Returns:
+    Tuple of (exists, status, error_message)
+    - exists: True if endpoint exists
+    - status: Endpoint state if exists (e.g., "READY", "NOT_READY")
+    - error_message: Error message if endpoint doesn't exist
+  """
+  try:
+    client = WorkspaceClient()
+    endpoint = client.serving_endpoints.get(endpoint_name)
+    state = endpoint.state.ready if endpoint.state else 'UNKNOWN'
+    return True, state, None
+  except ResourceDoesNotExist:
+    return False, None, f"Endpoint '{endpoint_name}' does not exist"
+  except Exception as e:
+    logger.warning(f'Could not validate endpoint {endpoint_name}: {e}')
+    # Return True with UNKNOWN status - don't block if we can't validate
+    return True, 'UNKNOWN', None
 
 
 @router.get('/config/agents')
@@ -45,31 +70,62 @@ async def get_agents():
       # Handle both string format (legacy) and object format
       if isinstance(agent_config, str):
         endpoint_name = agent_config
+        mas_id = None
         manual_config = {}
       else:
         endpoint_name = agent_config.get('endpoint_name', '')
+        mas_id = agent_config.get('mas_id')
         manual_config = agent_config
 
       try:
         # Check if this is a MAS endpoint and has no manually defined tools
         has_manual_tools = manual_config.get('tools') and len(manual_config.get('tools', [])) > 0
 
-        if is_mas_endpoint(endpoint_name) and not has_manual_tools:
+        # Determine if this is a MAS agent (either by endpoint_name pattern or mas_id)
+        is_mas = is_mas_endpoint(endpoint_name) or mas_id
+
+        if is_mas and not has_manual_tools:
+          # If we have mas_id but no endpoint_name, resolve it now
+          if mas_id and not endpoint_name:
+            endpoint_name = await service.async_get_endpoint_name_from_mas_id(mas_id)
+            logger.info(f'Resolved mas_id {mas_id} -> {endpoint_name}')
+
           # Fetch full details from Agent Bricks API for MAS endpoints
           agent_details = await service.async_get_agent_details_from_endpoint(endpoint_name)
+          # Preserve mas_id in the response for frontend reference
+          if mas_id:
+            agent_details['mas_id'] = mas_id
+          # Merge in manual config properties (like question_examples)
+          if manual_config.get('question_examples'):
+            agent_details['question_examples'] = manual_config['question_examples']
           logger.info(f'Loaded MAS agent details for {endpoint_name}')
           return agent_details
         else:
           # Use manual configuration for non-MAS endpoints or when tools are explicitly defined
           logger.info(f'Using manual config for non-MAS endpoint {endpoint_name}')
+
+          # Validate endpoint exists
+          exists, status, error = validate_serving_endpoint(endpoint_name)
+          if not exists:
+            logger.error(f'Endpoint validation failed: {error}')
+            return {
+              'id': endpoint_name,
+              'name': endpoint_name,
+              'endpoint_name': endpoint_name,
+              'display_name': manual_config.get('display_name', endpoint_name),
+              'error': error,
+              'status': 'ERROR',
+            }
+
           return {
             'id': endpoint_name,
             'name': endpoint_name,
             'endpoint_name': endpoint_name,
             'display_name': manual_config.get('display_name', endpoint_name),
             'display_description': manual_config.get('display_description', ''),
-            'status': 'UNKNOWN',  # We don't know the status for non-MAS endpoints
+            'status': status,
             'mlflow_experiment_id': manual_config.get('mlflow_experiment_id'),
+            'question_examples': manual_config.get('question_examples', []),
             'tools': [
               {
                 'name': tool.get('name', ''),
@@ -82,13 +138,21 @@ async def get_agents():
           }
 
       except ValueError as e:
-        logger.error(f'Failed to load agent {endpoint_name}: {e}')
-        # Include a minimal entry for failed agents
+        # Use mas_id as identifier if endpoint_name is not available
+        agent_id = endpoint_name or mas_id or 'unknown'
+        logger.error(f'Failed to load agent {agent_id}: {e}')
+
+        # Determine display name based on what failed
+        if mas_id and not endpoint_name:
+          display_name = 'MAS Unavailable'
+        else:
+          display_name = manual_config.get('display_name', agent_id)
+
         return {
-          'id': endpoint_name,
-          'name': endpoint_name,
-          'endpoint_name': endpoint_name,
-          'display_name': manual_config.get('display_name', endpoint_name),
+          'id': agent_id,
+          'name': agent_id,
+          'endpoint_name': agent_id,
+          'display_name': display_name,
           'error': str(e),
           'status': 'ERROR',
         }

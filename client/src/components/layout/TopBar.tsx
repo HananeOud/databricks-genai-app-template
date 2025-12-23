@@ -16,11 +16,8 @@ export function TopBar({
   onEditModeToggle,
 }: TopBarProps) {
   const [branding, setBranding] = useState<AppBranding>({
-    tabTitle: "AI Assistant",
-    appName: "AI Assistant",
-    companyName: "",
-    description: "",
-    logoPath: "/logos/databricks-symbol-color.svg",
+    name: "AI Assistant",
+    logo: "/logos/databricks-symbol-color.svg",
   });
   const [isMlflowOpen, setIsMlflowOpen] = useState(false);
   const mlflowRef = useRef<HTMLDivElement>(null);
@@ -67,21 +64,21 @@ export function TopBar({
   return (
     <header className="fixed top-0 left-0 right-0 z-30 h-[var(--header-height)] bg-[var(--color-background)]/70 backdrop-blur-xl backdrop-saturate-150 border-b border-[var(--color-border)]/40 shadow-sm">
       <div className="flex items-center justify-between h-full px-4 lg:px-6">
-        {/* Left Section - Logo & Company Name */}
+        {/* Left Section - Logo & Name */}
         <div className="flex items-center gap-4">
           {/* Logo */}
           <div className="relative w-24 h-8">
             <img
-              src={branding.logoPath}
-              alt={branding.appName}
+              src={branding.logo}
+              alt={branding.name}
               className="w-full h-full object-contain"
             />
           </div>
 
-          {/* Company Name */}
-          {branding.companyName && (
+          {/* Name */}
+          {branding.name && (
             <h1 className="text-2xl font-medium tracking-tight text-[var(--color-text-heading)]">
-              {branding.companyName}
+              {branding.name}
             </h1>
           )}
         </div>

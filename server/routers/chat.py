@@ -5,23 +5,15 @@ Chat creation and message storage is handled by /invoke_endpoint.
 """
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, Request
 from fastapi.responses import Response
-from pydantic import BaseModel
 
 from ..chat_storage import storage
 from ..services.user import get_current_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
-class UpdateChatRequest(BaseModel):
-  """Request to update a chat."""
-
-  title: Optional[str] = None
 
 
 @router.get('/chats')
@@ -55,31 +47,6 @@ async def get_chat_by_id(request: Request, chat_id: str):
     return Response(content=f'Chat {chat_id} not found', status_code=404)
 
   logger.info(f'Retrieved chat {chat_id} with {len(chat.messages)} messages for user: {user_email}')
-  return chat.to_dict()
-
-
-@router.patch('/chats/{chat_id}')
-async def update_chat(request: Request, chat_id: str, body: UpdateChatRequest):
-  """Update a chat (e.g., rename title) for the current user."""
-  user_email = await get_current_user(request)
-  user_storage = storage.get_storage_for_user(user_email)
-
-  logger.info(f'Updating chat {chat_id} for user: {user_email}')
-
-  # Update title if provided
-  if body.title is not None:
-    success = await user_storage.update_title(chat_id, body.title)
-    if not success:
-      logger.warning(f'Chat not found: {chat_id} for user: {user_email}')
-      return Response(content=f'Chat {chat_id} not found', status_code=404)
-    logger.info(f'Updated chat {chat_id} title to: {body.title}')
-
-  # Fetch updated chat
-  chat = await user_storage.get(chat_id)
-  if not chat:
-    logger.warning(f'Chat not found: {chat_id} for user: {user_email}')
-    return Response(content=f'Chat {chat_id} not found', status_code=404)
-
   return chat.to_dict()
 
 

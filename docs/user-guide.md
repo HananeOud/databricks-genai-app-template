@@ -138,9 +138,14 @@ This unified config file contains agents, branding, and dashboard settings:
 {
   "agents": [
     {
+      "mas_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "question_examples": ["What can you help me with?", "How do I get started?"]
+    },
+    {
       "endpoint_name": "my-agent-endpoint",
       "display_name": "My Agent",
       "display_description": "Agent description shown in UI",
+      "question_examples": ["Example question 1", "Example question 2"],
       "tools": [
         {
           "name": "tool_function_name",
@@ -152,11 +157,8 @@ This unified config file contains agents, branding, and dashboard settings:
     }
   ],
   "branding": {
-    "tabTitle": "My App",
-    "appName": "My App",
-    "companyName": "My Company",
-    "description": "AI-powered assistant",
-    "logoPath": "/logos/logo.svg"
+    "name": "My Company",
+    "logo": "/logos/logo.svg"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -168,14 +170,15 @@ This unified config file contains agents, branding, and dashboard settings:
 ```
 
 **Agent fields:**
+- `mas_id`: MAS tile UUID (alternative to endpoint_name, mutually exclusive)
 - `endpoint_name`: Name of your Databricks Model Serving endpoint
 - `mlflow_experiment_id`: MLflow experiment ID for tracing (configured here, NOT .env.local)
-- `tools`: Optional array of tools displayed in UI
+- `question_examples`: Example questions shown in chat input for this agent
+- `tools`: Optional array of tools displayed in UI (auto-detected for MAS agents)
 
 **Branding fields:**
-- `tabTitle`: Browser tab title
-- `appName`: Application name displayed in UI
-- `logoPath`: Path to logo file in `client/public/`
+- `name`: Company/app name displayed in TopBar
+- `logo`: Path to logo file in `client/public/`
 
 **Dashboard fields:**
 - `iframeUrl`: Optional URL to embed external dashboard (e.g., AI/BI Dashboard)

@@ -1,35 +1,20 @@
 {
+  "app_name": "databricks-app-template",
+  "enable_tracker": true,
+  "demo_catalog_id": "",
   "agents": [
     {
-      "endpoint_name": "mas-209415fd-endpoint"
-    },
-    {
-      "endpoint_name": "my-custom-agent-endpoint",
-      "display_name": "Custom Sales Agent",
-      "display_description": "A custom agent that helps with sales forecasting and pipeline analysis.",
-      "mlflow_experiment_id": "1234567890",
-      "tools": [
-        {
-          "name": "sales_forecast",
-          "display_name": "Sales Forecaster",
-          "description": "Predicts future sales based on historical data and market trends",
-          "type": "function"
-        },
-        {
-          "name": "pipeline_analyzer",
-          "display_name": "Pipeline Analyzer",
-          "description": "Analyzes your sales pipeline and identifies bottlenecks",
-          "type": "function"
-        }
+      "mas_id": "a45eb36c4-0e8a-4094-aa86-67df6e0b455d",
+      "question_examples": [
+        "What can you help me with?",
+        "How do I get started?",
+        "Show me an example query"
       ]
     }
   ],
   "branding": {
-    "tabTitle": "Databricks GenAI App Template",
-    "appName": "databricks-genai-app-template",
-    "companyName": "Databricks",
-    "description": "Databricks GenAI App Template",
-    "logoPath": "/logos/u_logo.svg"
+    "name": "Databricks",
+    "logo": "/logos/u_logo.svg"
   },
   "home": {
     "title": "Databricks App Template",

@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
 import { FeedbackModal } from "@/components/modals/FeedbackModal";
@@ -42,12 +43,14 @@ export function ChatCore({
 }: ChatCoreProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const { userInfo } = useUserInfo();
   const { agents } = useAgents();
 
-  // Get MLflow experiment ID for the selected agent
+  // Get selected agent and its properties
   const selectedAgent = agents.find((a) => a.id === selectedAgentId);
   const mlflowExperimentId = selectedAgent?.mlflow_experiment_id;
+  const questionExamples = selectedAgent?.question_examples || [];
 
   // Build MLflow trace URL
   const getMlflowTraceUrl = (traceId: string | undefined) => {
@@ -148,6 +151,8 @@ export function ChatCore({
   };
 
   const loadChatHistory = async (id: string) => {
+    setMessages([]); // Clear messages immediately to avoid showing old content
+    setIsLoadingHistory(true);
     try {
       const response = await fetch(`/api/chats/${id}`);
 
@@ -178,6 +183,7 @@ export function ChatCore({
         timestamp: new Date(msg.timestamp),
         traceId: msg.trace_id,
         traceSummary: msg.trace_summary,
+        isError: msg.is_error,
       }));
 
       devLog("Loaded", loadedMessages.length, "messages from chat history");
@@ -185,6 +191,8 @@ export function ChatCore({
     } catch (error) {
       console.error("Failed to load chat history:", error);
       setMessages([]);
+    } finally {
+      setIsLoadingHistory(false);
     }
   };
 
@@ -275,6 +283,55 @@ export function ChatCore({
 
                 if (activeChatId && onChatIdChange) {
                   onChatIdChange(activeChatId);
+                }
+                continue;
+              }
+
+              // Handle error events from the server
+              if (event.type === "error") {
+                devLog("Received error event:", event.error);
+
+                // Show error as assistant message
+                const errorContent = `Sorry, I encountered an error: ${event.error}`;
+                if (!assistantMessageCreated) {
+                  assistantMessageCreated = true;
+                  setMessages((prev) => [
+                    ...prev,
+                    {
+                      id: assistantMessageId,
+                      role: "assistant",
+                      content: errorContent,
+                      timestamp: new Date(),
+                      isError: true,
+                    },
+                  ]);
+                } else {
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessageId
+                        ? { ...msg, content: errorContent, isError: true }
+                        : msg,
+                    ),
+                  );
+                }
+                continue;
+              }
+
+              // Handle stream completion - update message with trace data
+              if (event.type === "stream.completed") {
+                devLog("Stream completed:", event);
+                if (assistantMessageCreated && (event.trace_id || event.trace_summary)) {
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessageId
+                        ? {
+                            ...msg,
+                            traceId: event.trace_id,
+                            traceSummary: event.trace_summary,
+                          }
+                        : msg,
+                    ),
+                  );
                 }
                 continue;
               }
@@ -391,12 +448,6 @@ export function ChatCore({
                 : msg,
             ),
           );
-        }
-
-        // Reload chat from backend to get stored messages with trace_id
-        if (activeChatId) {
-          devLog("Reloading chat to get trace data:", activeChatId);
-          await loadChatHistory(activeChatId);
         }
       } finally {
         reader.releaseLock();
@@ -529,15 +580,24 @@ export function ChatCore({
       <div
         className={`flex-1 overflow-y-auto overflow-x-hidden bg-transparent ${compact ? "pb-2" : "pb-6"}`}
       >
-        <MessageList
-          messages={messages}
-          isLoading={isLoading}
-          onFeedback={handleFeedback}
-          onViewTrace={handleTrace}
-          selectedAgentId={selectedAgentId}
-          compact={compact}
-        />
-        <div ref={messagesEndRef} />
+        {isLoadingHistory ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <Loader2 className="h-8 w-8 text-[var(--color-accent-primary)] animate-spin" />
+            <p className="mt-3 text-sm text-[var(--color-text-muted)]">Loading conversation...</p>
+          </div>
+        ) : (
+          <>
+            <MessageList
+              messages={messages}
+              isLoading={isLoading}
+              onFeedback={handleFeedback}
+              onViewTrace={handleTrace}
+              selectedAgentId={selectedAgentId}
+              compact={compact}
+            />
+            <div ref={messagesEndRef} />
+          </>
+        )}
       </div>
 
       <div
@@ -551,6 +611,7 @@ export function ChatCore({
           hasMessages={messages.length > 0}
           compact={compact}
           showAgentSelector={showAgentSelector}
+          questionExamples={questionExamples}
         />
       </div>
 

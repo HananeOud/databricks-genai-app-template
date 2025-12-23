@@ -13,6 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 # Import tracing module to set up MLflow tracking URI for feedback logging
 # Imported with '# noqa: F401' (tells linter it's intentionally unused)
 from . import tracing  # noqa: F401
+from .config_loader import config_loader
 
 # Routers for organizing endpoints
 from .db import run_migrations
@@ -80,6 +81,27 @@ app.add_middleware(
   allow_methods=['*'],
   allow_headers=['*'],
 )
+
+# Add usage tracker (optional, based on config)
+# See https://pypi.org/project/dbdemos-tracker/ for details
+tracker_config = config_loader.app_config
+if tracker_config.get('enable_tracker', False):
+  try:
+    from dbdemos_tracker import Tracker
+
+    app_name = tracker_config.get('app_name', 'databricks-app-template')
+    demo_catalog_id = tracker_config.get('demo_catalog_id', '')
+
+    if demo_catalog_id:
+      Tracker.add_tracker_fastapi(app, app_name, demo_catalog_id=demo_catalog_id)
+    else:
+      Tracker.add_tracker_fastapi(app, app_name)
+
+    logger.info(f'✅ Tracker enabled for app: {app_name}')
+  except ImportError:
+    logger.warning('dbdemos-tracker not installed, skipping tracker')
+  except Exception as e:
+    logger.warning(f'Failed to initialize tracker: {e}')
 
 API_PREFIX = '/api'
 

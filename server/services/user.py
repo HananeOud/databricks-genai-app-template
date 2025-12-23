@@ -22,7 +22,7 @@ _workspace_url_cache: Optional[str] = None
 
 def _is_local_development() -> bool:
   """Check if running in local development mode."""
-  return os.getenv('ENV', 'production') == 'development'
+  return os.getenv('ENV', 'development') == 'development'
 
 
 async def get_current_user(request: Request) -> str:

@@ -70,6 +70,7 @@ def upgrade() -> None:
     ),
     sa.Column('trace_id', sa.String(100), nullable=True),
     sa.Column('trace_summary', postgresql.JSONB, nullable=True),
+    sa.Column('is_error', sa.Boolean(), nullable=False, server_default='false'),
   )
 
   # Create composite index for chat + timestamp queries

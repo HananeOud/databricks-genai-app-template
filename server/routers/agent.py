@@ -20,6 +20,25 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def create_error_stream(error: str, message: str = '') -> StreamingResponse:
+  """Create an SSE-compatible error response."""
+
+  async def error_generator():
+    error_event = {'type': 'error', 'error': error, 'message': message}
+    yield f'data: {json.dumps(error_event)}\n\n'
+    yield 'data: [DONE]\n\n'
+
+  return StreamingResponse(
+    error_generator(),
+    media_type='text/event-stream',
+    headers={
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    },
+  )
+
+
 class LogAssessmentRequest(BaseModel):
   """Request to log user feedback for a trace."""
 
@@ -100,18 +119,18 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
 
   if not agent:
     logger.error(f'Agent not found: {options.agent_id}')
-    return {
-      'error': f'Agent not found: {options.agent_id}',
-      'message': 'Please check your agent configuration',
-    }
+    return create_error_stream(
+      error=f'Agent not found: {options.agent_id}',
+      message='Please check your agent configuration',
+    )
 
   endpoint_name = agent.get('endpoint_name')
   if not endpoint_name:
     logger.error(f'Agent {options.agent_id} has no endpoint_name configured')
-    return {
-      'error': 'No endpoint configured',
-      'message': f'Agent {options.agent_id} has no endpoint_name',
-    }
+    return create_error_stream(
+      error='No endpoint configured - check your app.json configuration',
+      message=f'Agent {options.agent_id} has no endpoint_name',
+    )
 
   # Create or get chat
   chat_id = options.chat_id
@@ -128,7 +147,7 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
     chat = await user_storage.get(chat_id)
     if not chat:
       logger.error(f'Chat not found: {chat_id}')
-      return {'error': f'Chat not found: {chat_id}'}
+      return create_error_stream(error=f'Chat not found: {chat_id}')
 
   try:
     handler = DatabricksEndpointHandler(agent)
@@ -144,6 +163,7 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
       function_calls: List[Dict[str, Any]] = []
       trace_id: Optional[str] = None
       databricks_output: Optional[Dict[str, Any]] = None
+      error_message: Optional[str] = None
 
       try:
         stream = handler.predict_stream(
@@ -234,12 +254,14 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
 
       except Exception as e:
         logger.error(f'Error during streaming: {e}')
+        error_message = str(e)
         yield f'data: {json.dumps({"type": "error", "error": str(e)})}\n\n'
 
       # Log final extraction results for debugging
-      logger.info(f'🔍 Stream completed - trace_id: {trace_id}, has_databricks_output: {databricks_output is not None}')
+      logger.info(f'🔍 Stream completed - trace_id: {trace_id}, has_databricks_output: {databricks_output is not None}, error: {error_message}')
 
       # After stream completes, save messages to storage
+      trace_summary = None
       try:
         # Save user message (the last one in the input)
         if options.messages:
@@ -253,7 +275,6 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
           await user_storage.add_message(chat_id, user_message)
 
         # Build trace summary matching frontend TraceSummary type
-        trace_summary = None
         if function_calls or trace_id:
           # Convert function_calls to tools_called format expected by frontend
           tools_called = [
@@ -269,7 +290,7 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
           trace_summary = {
             'trace_id': trace_id,
             'duration_ms': 0,
-            'status': 'OK',
+            'status': 'ERROR' if error_message else 'OK',
             'tools_called': tools_called,
             'retrieval_calls': [],
             'llm_calls': [],
@@ -279,15 +300,17 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
             'databricks_output': databricks_output,
           }
 
-        # Save assistant message with trace data
-        if final_text or function_calls:
+        # Save assistant message with trace data (including error messages)
+        if final_text or function_calls or error_message:
+          content = final_text if final_text else f'Sorry, I encountered an error: {error_message}'
           assistant_message = MessageModel(
             id=f'msg_{uuid.uuid4().hex[:12]}',
             role='assistant',
-            content=final_text,
+            content=content,
             timestamp=datetime.now(),
             trace_id=trace_id,
             trace_summary=trace_summary,
+            is_error=error_message is not None,
           )
           await user_storage.add_message(chat_id, assistant_message)
 
@@ -295,11 +318,22 @@ async def invoke_endpoint(request: Request, options: InvokeEndpointRequest):
           f'💾 Saved messages to chat {chat_id}: '
           f'text={len(final_text)} chars, '
           f'tools={len(function_calls)}, '
-          f'trace_id={trace_id}'
+          f'trace_id={trace_id}, '
+          f'error={error_message is not None}'
         )
 
       except Exception as e:
         logger.error(f'Failed to save messages to storage: {e}')
+
+      # Send completion event with trace info so frontend doesn't need to reload
+      completion_event = {
+        'type': 'stream.completed',
+        'trace_id': trace_id,
+        'trace_summary': trace_summary,
+        'is_error': error_message is not None,
+      }
+      yield f'data: {json.dumps(completion_event)}\n\n'
+      yield 'data: [DONE]\n\n'
 
     return StreamingResponse(
       stream_and_store(),

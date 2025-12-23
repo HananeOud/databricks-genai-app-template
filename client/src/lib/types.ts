@@ -95,6 +95,7 @@ export interface Message {
   traceId?: string;
   visualizations?: Visualization[];
   traceSummary?: TraceSummary;
+  isError?: boolean;
 }
 
 export interface Visualization {
@@ -176,6 +177,7 @@ export interface Agent {
   mlflow_experiment_url?: string;
   mlflow_traces_url?: string;
   error?: string; // If agent failed to load
+  question_examples?: string[]; // Example questions shown in chat input
 }
 
 export interface AgentMetadata {

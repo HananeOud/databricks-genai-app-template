@@ -1,0 +1,57 @@
+{
+  "app_name": "databricks-app-template",
+  "enable_tracker": true,
+  "demo_catalog_id": "",
+  "agents": [
+    {
+      "endpoint_name": "databricks-gpt-5-2"
+    },
+    {
+      "mas_id": "45eb36c4-0e8a-4094-aa86-67df6e0b455d",
+      "question_examples": [
+        "What can you help me with?",
+        "How do I get started?",
+        "Show me an example query"
+      ]
+    },
+    {
+      "endpoint_name": "my-custom-agent-endpoint",
+      "display_name": "Custom Sales Agent",
+      "display_description": "A custom agent that helps with sales forecasting and pipeline analysis.",
+      "mlflow_experiment_id": "1234567890",
+      "question_examples": [
+        "What are our sales projections for next quarter?",
+        "Analyze my current pipeline",
+        "Show me conversion rates by region"
+      ],
+      "tools": [
+        {
+          "name": "sales_forecast",
+          "display_name": "Sales Forecaster",
+          "description": "Predicts future sales based on historical data and market trends",
+          "type": "function"
+        },
+        {
+          "name": "pipeline_analyzer",
+          "display_name": "Pipeline Analyzer",
+          "description": "Analyzes your sales pipeline and identifies bottlenecks",
+          "type": "function"
+        }
+      ]
+    }
+  ],
+  "branding": {
+    "name": "Databricks",
+    "logo": "/logos/u_logo.svg"
+  },
+  "home": {
+    "title": "Databricks App Template",
+    "description": "Build production-ready AI applications with Databricks. This template provides a complete foundation for creating intelligent agents, chat interfaces, and data-driven dashboards."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Dashboard",
+    "iframeUrl": "",
+    "showPadding": true
+  }
+}

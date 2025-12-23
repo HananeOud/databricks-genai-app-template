@@ -6,7 +6,7 @@ This module defines the database schema for persistent chat storage.
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Index, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -74,6 +74,7 @@ class MessageModel(Base):
   )
   trace_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
   trace_summary: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+  is_error: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
   # Relationship back to chat
   chat: Mapped['ChatModel'] = relationship('ChatModel', back_populates='messages')
@@ -92,4 +93,5 @@ class MessageModel(Base):
       'timestamp': self.timestamp.isoformat() if self.timestamp else None,
       'trace_id': self.trace_id,
       'trace_summary': self.trace_summary,
+      'is_error': self.is_error,
     }

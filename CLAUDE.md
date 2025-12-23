@@ -60,15 +60,12 @@ LAKEBASE_PG_URL=postgresql://...  # Optional, enables PostgreSQL chat storage
 ```json
 {
   "agents": [{
-    "endpoint_name": "my-endpoint",
-    "display_name": "My Agent",
-    "mlflow_experiment_id": "1234567890",
-    "tools": [...]
+    "mas_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "question_examples": ["What can you help me with?"]
   }],
   "branding": {
-    "tabTitle": "My App",
-    "appName": "My App",
-    "logoPath": "/logos/logo.svg"
+    "name": "My Company",
+    "logo": "/logos/logo.svg"
   },
   "dashboard": {
     "iframeUrl": "",
