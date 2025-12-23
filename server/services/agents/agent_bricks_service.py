@@ -534,7 +534,7 @@ class AgentBricksService:
     Uses sync HTTP client to avoid event loop issues at startup.
     """
     headers = self._get_headers()
-    url = f'{self.host}/api/2.0/multi-agent-supervisors/{mas_id}'
+    url = f'{self._get_base_url()}/api/2.0/multi-agent-supervisors/{mas_id}'
 
     with httpx.Client(headers=headers) as client:
       response = client.get(url)
