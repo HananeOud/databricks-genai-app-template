@@ -546,7 +546,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       onChange={(e) =>
                         updateTypography({ primaryFont: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-text-primary)]"
                     >
                       {fontOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -565,7 +565,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       onChange={(e) =>
                         updateTypography({ secondaryFont: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-text-primary)]"
                     >
                       {fontOptions.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -773,7 +773,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       value={themeName}
                       onChange={(e) => setThemeName(e.target.value)}
                       placeholder="My Custom Theme"
-                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
                     />
                   </div>
                   <div>
@@ -785,7 +785,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                       value={themeDescription}
                       onChange={(e) => setThemeDescription(e.target.value)}
                       placeholder="A beautiful custom theme"
-                      className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                      className="w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
                     />
                   </div>
                   <Button
@@ -823,7 +823,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://example.com"
                   disabled
-                  className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                  className="w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
                 />
               </div>
 
@@ -836,7 +836,7 @@ export function EditModePanel({ isOpen, onClose }: EditModePanelProps) {
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Describe the style you want (e.g., 'Modern and minimalist with blue accents')"
                   disabled
-                  className="w-full px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl resize-none outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                  className="w-full px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl resize-none outline-none transition-all duration-300 opacity-50 cursor-not-allowed text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
                   rows={3}
                 />
               </div>
@@ -906,7 +906,7 @@ function ColorPicker({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 px-4 py-2.5 bg-[var(--color-background)]/80 backdrop-blur-sm border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 font-mono text-sm text-[var(--color-foreground)]"
+          className="flex-1 px-4 py-2.5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-2xl outline-none focus:border-[var(--color-accent-primary)]/60 focus:shadow-lg transition-all duration-300 font-mono text-sm text-[var(--color-text-primary)]"
         />
       </div>
     </div>

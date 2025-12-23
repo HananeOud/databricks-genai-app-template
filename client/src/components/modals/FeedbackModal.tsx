@@ -177,7 +177,7 @@ export function FeedbackModal({
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Optional: Share more details about your experience..."
-                  className="w-full px-4 py-3 bg-[var(--color-background)]/70 backdrop-blur-sm border border-[var(--color-border)]/50 rounded-xl resize-none outline-none focus:border-[var(--color-accent-primary)]/50 transition-all duration-200 text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)]"
+                  className="w-full px-4 py-3 bg-[var(--color-bg-secondary)] border border-[var(--color-border)]/50 rounded-xl resize-none outline-none focus:border-[var(--color-accent-primary)]/50 transition-all duration-200 text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
                   rows={4}
                 />
               </div>
