@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAppConfig, type DashboardConfig } from "@/lib/config";
 import { useUserInfo } from "@/hooks/useUserInfo";
@@ -29,7 +29,7 @@ export function DashboardView() {
   if (iframeUrl) {
     return (
       <div className="h-full flex flex-col overflow-hidden">
-        {/* Header with title, subtitle, and Ask Agent button */}
+        {/* Header with title, subtitle, and buttons */}
         <div className="flex-shrink-0 px-6 pt-6 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
@@ -41,14 +41,28 @@ export function DashboardView() {
               </p>
             </div>
 
-            {/* Ask Agent Button */}
-            <button
-              onClick={() => navigate("/chat")}
-              className="flex-shrink-0 p-3 rounded-xl bg-[#0C1C3E] hover:bg-[#152a52] transition-all duration-200 group shadow-sm hover:shadow-md"
-              aria-label="Ask the AI agent"
-            >
-              <Sparkles className="h-5 w-5 text-white transition-transform group-hover:rotate-12" />
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Open in new tab fallback */}
+              <a
+                href={iframeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] transition-all duration-200 group shadow-sm hover:shadow-md text-[var(--color-text-primary)] text-sm font-medium"
+                title="Open dashboard in a new tab"
+              >
+                <ExternalLink className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+                Open in new tab
+              </a>
+
+              {/* Ask Agent Button */}
+              <button
+                onClick={() => navigate("/chat")}
+                className="flex-shrink-0 p-3 rounded-xl bg-[#0C1C3E] hover:bg-[#152a52] transition-all duration-200 group shadow-sm hover:shadow-md"
+                aria-label="Ask the AI agent"
+              >
+                <Sparkles className="h-5 w-5 text-white transition-transform group-hover:rotate-12" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -58,10 +72,10 @@ export function DashboardView() {
         >
           <iframe
             src={iframeUrl}
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 rounded-lg"
             title={title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation"
           />
         </div>
       </div>

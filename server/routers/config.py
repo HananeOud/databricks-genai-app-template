@@ -23,8 +23,13 @@ AGENTS_CACHE_TTL_SECONDS = 300
 
 
 def is_mas_endpoint(endpoint_name: str) -> bool:
-  """Check if an endpoint is a MAS (Multi-Agent Supervisor) endpoint."""
-  return 'mas' in endpoint_name.lower()
+  """Check if an endpoint is a native Agent Bricks MAS endpoint.
+
+  Only matches the specific pattern: mas-<hex_id>-endpoint
+  Does NOT match custom endpoints that happen to contain 'mas' in the name.
+  """
+  import re
+  return bool(re.match(r'^mas-[a-f0-9]+-endpoint$', endpoint_name.lower()))
 
 
 def validate_agent_config(agent_config, index: int) -> Optional[dict]:

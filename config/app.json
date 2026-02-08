@@ -18,6 +18,12 @@
       "genie_space_id": "01f10471a6bd1a59ab22df10a6edda2c",
       "display_name": "Latecoere Genie",
       "display_description": "Query your data using natural language powered by Databricks Genie"
+    },
+    {
+      "endpoint_name": "Ghouse_houd_mas_cust",
+      "display_name": "Intelligent Assistant",
+      "display_description": "Your all-in-one assistant — answers from documents and data in one place",
+      "question_examples": ["What can you help me with?", "Show me Jane Doe's purchase history"]
     }
   ],
   "branding": {
